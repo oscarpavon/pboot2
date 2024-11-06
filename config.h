@@ -1,7 +1,7 @@
 #include "types.h"
 
-uint8_t default_entry = 6;
-bool show_menu = true;
+uint8_t default_entry = 2;
+bool show_menu = false;
 
 static const BootLoaderEntry entries[] = {
 	{u"Pavon Linux", u"pavonlinuz", u"quiet root=/dev/nvme0n1p3 rw fstype=ext4 init=/sbin/pinit"},

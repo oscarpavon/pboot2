@@ -7,8 +7,8 @@ CFLAGS := -ffreestanding -MMD -mno-red-zone -std=c11 \
 	-target x86_64-unknown-windows
 LDFLAGS := -flavor link -subsystem:efi_application -entry:efi_main
 
-BOOTX64.EFI: main.o
-	$(LD) $(LDFLAGS) main.o -out:BOOTX64.EFI
+BOOTX64.EFI: main.s
+	fasm main.s BOOTX64.EFI
 
 main.o: main.c config.h types.h efi.h
 	$(CC) $(CFLAGS) -c main.c -o main.o
