@@ -62,16 +62,16 @@ struct InputProtocol{
 };
 
 struct SystemTable{
-	struct TableHeader header;
-	uint16_t *unused1;//firmware vendor
-	uint32_t unused2;//firmware revision
-	void *unused3;//console in handle
-	struct InputProtocol *input; //ConIn
-	void *unused5;//console out handle
-	struct efi_simple_text_output_protocol *out;//console out
-	void *unused6;//standard error handle
-	void *unused7;//standard error
-	void *unused8;//runtime services
+	struct TableHeader header;//24bytes
+	uint16_t *unused1;//firmware vendor//8
+	uint32_t unused2;//firmware revision//4 
+	void *unused3;//console in handle//8
+	struct InputProtocol *input; //ConIn//8
+	void *unused5;//console out handle//8 current 60bytes aligment 64
+	struct efi_simple_text_output_protocol *out;//console out//8
+	void *unused6;//standard error handle//8
+	void *unused7;//standard error//8
+	void *unused8;//runtime services//8 //88bytes offset
 	struct BootTable* boot_table;//boot services
 	uint64_t unused10;//number of table entries
 	void *unused11;//configuration table
