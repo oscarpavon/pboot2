@@ -1,7 +1,10 @@
 format pe64 efi
 section '.text' code executable readable
 
-;;Calling convertion rcx, rdx, r8, r9 
+;;Calling convertion parameters rcx, rdx, r8, r9 
+;;return value are in rax
+;;need 32 bytes of shadow space
+;; shadow space is dedicated memory for saving four registers, precisely: rcx, rdx, r8 and r9
 EFI_SIMPLE_TEXT_INPUT_PROTOCOL = 64
 EFI_TEXT_STRING = 8
 
@@ -18,6 +21,7 @@ entry $
 
 print:
   mov rdi,[EFI_SYSTEM_TABLE]
+  ;;rcx - EFI_HANDLE
   mov rcx,[rdi + EFI_SIMPLE_TEXT_INPUT_PROTOCOL]
   mov rax,[rcx + EFI_TEXT_STRING]
 
