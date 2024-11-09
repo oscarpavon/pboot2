@@ -24,26 +24,63 @@ entry $
   mov [EFI_SYSTEM_TABLE], rdx
   mov [EFI_BOOT_LOADER_HANDLE], rcx
 
-  call print
-  call print
+
+  
+back:
+
+  mov rdx,string
   call print
   jmp $
+
+error:
+  mov rdx, error_msg
+  call print
+  jmp back
+  
+
 
 print:
   mov rdi,[EFI_SYSTEM_TABLE]
   mov rcx,[rdi + EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL]
   mov rax,[rcx + EFI_TEXT_STRING]
 
-  mov rdx,string
   ;; Set up the shadow space. We just need to reserve 32 bytes
   ;; on the stack, which we do by manipulating the stack pointer:
   sub rsp,SHADOW_SPACE
   call rax
   add rsp,SHADOW_SPACE
   ret
+ 
+
+open_protocol:
   
+  mov r11,[EFI_SYSTEM_TABLE]
+  mov r12,[r11 + EFI_BOOT_SERVICES]
+  mov r13, [r12 + EFI_OPEN_PROTOCOL]
+
+  mov rcx, EFI_BOOT_LOADER_HANDLE
+  lea rdx, [EFI_LOADED_IMAGE_PROTOCOL_GUID]
+  lea r8, [bootloader_image]
+  mov r9, EFI_BOOT_LOADER_HANDLE
+
+
+
+  sub rsp,SHADOW_SPACE
+
+  mov rax, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL
+  push rax
+  mov rax, 0
+  push rax
+
+  call r13
+
+  add rsp,SHADOW_SPACE
+
+  ;cmp rax, EFI_SUCCESS
+  ;jne error
 
 string du 'Fuck C',13,10,0
+error_msg du 'Error open loaded image',13,10,0
 EFI_SYSTEM_TABLE dq ?
 EFI_BOOT_LOADER_HANDLE dq ?
 EFI_LOADED_IMAGE_PROTOCOL_GUID dq 0x5b1b31a1, 0x9562, 0x11d2, 0x8e, 0x3f, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b
