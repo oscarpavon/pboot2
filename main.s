@@ -16,7 +16,11 @@ EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL = 0x00000001
 
 EFI_BOOT_SERVICES = 88
 
+EFI_MEMORY_LOADER_DATA = 2
+
 SHADOW_SPACE = 32
+
+EFI_ALLOCATE_POOL = 5 * 8
 
 entry $
 
@@ -24,6 +28,27 @@ entry $
   mov [EFI_SYSTEM_TABLE], rdx
   mov [EFI_BOOT_LOADER_HANDLE], rcx
 
+  mov rdx,string
+  call print
+
+  mov r11,[EFI_SYSTEM_TABLE]
+  mov r12,[r11 + EFI_BOOT_SERVICES]
+  mov r13, [r12 + EFI_ALLOCATE_POOL]
+
+  mov rax,30
+  mov rcx,EFI_MEMORY_LOADER_DATA
+  mov rdx,4;bytes to allocate
+  lea r8, [allocated_memory]
+
+  sub rsp, SHADOW_SPACE
+  call r13
+  add rsp, SHADOW_SPACE
+  cmp rax, EFI_SUCCESS
+  jne error
+
+
+  mov rdx,memory_allocated_msg
+  call print
 
   
 back:
@@ -33,7 +58,7 @@ back:
   jmp $
 
 error:
-  mov rdx, error_msg
+  mov rdx, error_memory_msg
   call print
   jmp back
   
@@ -79,8 +104,11 @@ open_protocol:
   ;cmp rax, EFI_SUCCESS
   ;jne error
 
+allocated_memory dq ?
 string du 'Fuck C',13,10,0
 error_msg du 'Error open loaded image',13,10,0
+error_memory_msg du 'Error allocating pool',13,10,0
+memory_allocated_msg du 'Allocated pool',13,10,0
 EFI_SYSTEM_TABLE dq ?
 EFI_BOOT_LOADER_HANDLE dq ?
 EFI_LOADED_IMAGE_PROTOCOL_GUID dq 0x5b1b31a1, 0x9562, 0x11d2, 0x8e, 0x3f, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b
