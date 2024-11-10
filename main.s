@@ -31,36 +31,17 @@ entry $
   mov rdx,string
   call print
 
-  mov r11,[EFI_SYSTEM_TABLE]
-  mov r12,[r11 + EFI_BOOT_SERVICES]
-  mov r13, [r12 + EFI_ALLOCATE_POOL]
-
-  mov rax,30
-  mov rcx,EFI_MEMORY_LOADER_DATA
-  mov rdx,4;bytes to allocate
-  lea r8, [allocated_memory]
-
-  sub rsp, SHADOW_SPACE
-  call r13
-  add rsp, SHADOW_SPACE
-  cmp rax, EFI_SUCCESS
-  jne error
-
-
-  mov rdx,memory_allocated_msg
-  call print
+  call allocate_pool
 
   
-back:
+main_loop:
 
-  mov rdx,string
-  call print
   jmp $
 
 error:
   mov rdx, error_memory_msg
   call print
-  jmp back
+  jmp main_loop
   
 
 
@@ -75,7 +56,28 @@ print:
   call rax
   add rsp,SHADOW_SPACE
   ret
- 
+
+allocate_pool:
+  
+  mov r11,[EFI_SYSTEM_TABLE]
+  mov r12,[r11 + EFI_BOOT_SERVICES]
+  mov r13, [r12 + EFI_ALLOCATE_POOL]
+
+  mov rcx,EFI_MEMORY_LOADER_DATA
+  mov rdx,4;bytes to allocate
+  lea r8, [allocated_memory]
+
+  sub rsp, 8*3
+  call r13
+  add rsp, 8*3
+  cmp rax, EFI_SUCCESS
+  jne error
+
+  mov rdx,memory_allocated_msg
+  call print
+
+  ret
+
 
 open_protocol:
   
