@@ -27,7 +27,7 @@ EFI_MEMORY_LOADER_DATA = 2
 
 SHADOW_SPACE = 32
 
-EFI_ALLOCATE_POOL = 5 * 8
+EFI_ALLOCATE_POOL = EFI_TABLE_HEADER + (5 * 8)
 
 entry $
   ;push rbp
@@ -42,14 +42,16 @@ entry $
   ;mov rax,0
   ;mov [rsp+8*5], rax
 
+  call allocate_pool
+
   mov r11,[EFI_SYSTEM_TABLE]
   mov r12,[r11 + EFI_BOOT_SERVICES]
   mov r13, [r12 + EFI_OPEN_PROTOCOL]
 
-  mov rcx, EFI_BOOT_LOADER_HANDLE
+  mov rcx, [EFI_BOOT_LOADER_HANDLE]
   mov rdx, EFI_LOADED_IMAGE_PROTOCOL_GUID
   mov r8, bootloader_image
-  mov r9, EFI_BOOT_LOADER_HANDLE
+  mov r9, [EFI_BOOT_LOADER_HANDLE]
 
 
   sub rsp,8*6
@@ -113,7 +115,7 @@ allocate_pool:
 
   mov rcx,EFI_MEMORY_LOADER_DATA
   mov rdx,4;bytes to allocate
-  lea r8, [allocated_memory]
+  mov r8, allocated_memory
 
   call r13
   cmp rax, EFI_SUCCESS
@@ -123,7 +125,7 @@ allocate_pool:
  ; pop rbp
 
   mov rdx,memory_allocated_msg
-  ;call print
+  call print
 
   leave
  
