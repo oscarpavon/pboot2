@@ -18,10 +18,10 @@ EFI_TEXT_STRING = 8
 EFI_TABLE_HEADER = 24
 EFI_SUCCESS = 0
 ;Boot Services
-EFI_OPEN_PROTOCOL = EFI_TABLE_HEADER + (33*8)
+EFI_OPEN_PROTOCOL = EFI_TABLE_HEADER + (32*8)
 EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL = 0x00000001
 
-EFI_BOOT_SERVICES = 88
+EFI_BOOT_SERVICES = 96
 
 EFI_MEMORY_LOADER_DATA = 2
 
@@ -48,16 +48,16 @@ entry $
 
   mov rcx, EFI_BOOT_LOADER_HANDLE
   mov rdx, EFI_LOADED_IMAGE_PROTOCOL_GUID
-  lea r8, [bootloader_image]
+  mov r8, bootloader_image
   mov r9, EFI_BOOT_LOADER_HANDLE
 
 
   sub rsp,8*6
 
   mov rax, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL
-  mov qword [rsp+(8*5)],rax
+  mov qword [rsp+8*5],rax
   mov rax, 0
-  mov qword [rsp+(8*4)],rax
+  mov qword [rsp+8*4],rax
 
   call r13
 
@@ -143,5 +143,7 @@ memory_allocated_msg du 'Allocated pool',13,10,0
 open_protocol_ok du 'Open protocol OK',13,10,0
 EFI_SYSTEM_TABLE dq ?
 EFI_BOOT_LOADER_HANDLE dq ?
-EFI_LOADED_IMAGE_PROTOCOL_GUID dd 0x5b1b31a1, 0x956211d2, 0x8e3f00a0 , 0xc969723b
+EFI_LOADED_IMAGE_PROTOCOL_GUID dd 0x5B1B31A1
+                                dw 0x9562,0x11d2
+                                db 0x8E,0x3F,0x00,0xA0,0xC9,0x69,0x72,0x3B
 bootloader_image dq ?
