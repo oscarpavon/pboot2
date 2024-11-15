@@ -33,6 +33,11 @@ DEVICE = 24
 
 OPEN_VOLUME = 8
 
+OPEN_FILE = 8
+
+EFI_FILE_READ_ONLY = 0x1
+EFI_FILE_MODE_READ = 0x1
+
 entry $
  
   push rbx;align stack to 16 bytes
@@ -93,20 +98,43 @@ entry $
   jne error
 
   ;open volume
+  sub rsp, 8*4
   mov rax, [FileSystemProtocol]
   
   mov rcx, [FileSystemProtocol]
   mov rdx, RootDirectory
   call qword [rax+OPEN_VOLUME]
 
+  add rsp, 8*4
+
   cmp rax, EFI_SUCCESS
   jne error
 
-  
+  ;open file 
+  sub rsp, 8*5
+  mov rax, [RootDirectory]
+  mov rcx, [RootDirectory] 
+  mov rdx, KernelFile
+  mov r8, kernel_name
+  mov r9, EFI_FILE_MODE_READ
+  mov r13, EFI_FILE_READ_ONLY
+  mov qword [rsp+8*4], r13
+
+  call qword [rax+OPEN_FILE]
+  add rsp, 8*5
+   
+  cmp rax, EFI_SUCCESS
+  jne error_open_file
+
   
 main_loop:
 
   jmp $
+
+error_open_file:
+  mov rdx, error_open_file_msg
+  call print
+  jmp main_loop
 
 error:
   mov rdx, error_memory_msg
@@ -171,10 +199,13 @@ open_protocol:
 
 allocated_memory dq ?
 string du 'Fuck C',13,10,0
+
+kernel_name du 'vmlinuz',0
 error_msg du 'Error open loaded image',13,10,0
 error_memory_msg du 'Error allocating pool',13,10,0
 memory_allocated_msg du 'Allocated pool',13,10,0
 open_protocol_ok du 'Open protocol OK',13,10,0
+error_open_file_msg du 'Error open file',13,10,0
 EFI_SYSTEM_TABLE dq ?
 EFI_BOOT_LOADER_HANDLE dq ?
 EFI_LOADED_IMAGE_PROTOCOL_GUID dd 0x5B1B31A1
@@ -188,3 +219,4 @@ EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID dd 0x0964e5b22
 BootLoaderImage dq ?
 FileSystemProtocol dq ?
 RootDirectory dq ?
+KernelFile dq ?
