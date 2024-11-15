@@ -184,17 +184,30 @@ entry $
   jne error
 
 
-  ;mov word ax,[char]
-  ;mov rdx,[allocated_memory]
-  ;mov word [rdx],ax
-  ;mov word [rdx+2],0
+  mov word ax,[char]
+  mov rdx,[allocated_memory]
+  mov word [rdx],ax
+  mov word [rdx+2],ax
 
+  mov r14,0 
+  read_kernel:
   mov rcx,[KernelFile]
-  mov rdx, KernelFileSize 
-  mov r8, [allocated_memory]
+  mov r13,KernelFileSize
+  sub r13,r14
+  mov [readed],r13
+  mov rdx,readed
+  ;mov rdx, KernelFileSize 
+  mov r15,[allocated_memory]
+  lea r8, [r15+r14]
   sub rsp,4*8
   call qword [rcx+READ]
   add rsp,4*8
+  add r14,readed
+  cmp r14,KernelFileSize
+  je continue
+  jl read_kernel
+
+  continue:
   
 
   mov rdx,[allocated_memory]
@@ -287,4 +300,4 @@ KernelFileSize dq ?
 size dq 16483328
 size2 dq 10
 char du 'T'
-
+readed rq 1
