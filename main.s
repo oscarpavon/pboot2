@@ -23,13 +23,17 @@ EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL = 0x00000001
 
 EFI_BOOT_SERVICES = 96
 
-EFI_MEMORY_LOADER_DATA = 2
+EFI_MEMORY_LOADER_DATA = 1
 
 SHADOW_SPACE = 32
 
 EFI_ALLOCATE_POOL = EFI_TABLE_HEADER + (5 * 8)
 
+EFI_IMAGE_LOAD = EFI_ALLOCATE_POOL + (17 * 8)
+EFI_IMAGE_START = EFI_ALLOCATE_POOL + (18 * 8)
+
 DEVICE = 24
+FILE_PATH = 32
 
 OPEN_VOLUME = 8
 
@@ -153,6 +157,8 @@ entry $
   cmp rax, EFI_SUCCESS
   jne error
 
+  mov rdx, string
+  call print
   ;allocate memory for kernel file
  
   sub rsp,8*4
@@ -160,7 +166,7 @@ entry $
   mov r12,[r11 + EFI_BOOT_SERVICES]
 
   mov rcx,EFI_MEMORY_LOADER_DATA
-  mov rdx, 10
+  mov rdx, KernelFileSize
   mov r8, allocated_memory
   call qword [r12+EFI_ALLOCATE_POOL]
   add rsp,8*4
@@ -176,22 +182,51 @@ entry $
   mov rdx, 0;we start from the zero position
   call qword [rax+SET_POSITION]
   add rsp, 8*4
-
-  
-  sub rsp, 8*4
-  mov rax, [KernelFile]
-  mov rcx, [KernelFile]
-  mov rdx, KernelFileSize
-  mov r8, allocated_memory
-  call qword [rax+READ]
-  add rsp, 8*4
   cmp rax, EFI_SUCCESS
   jne error
 
  
-  mov rdx,allocated_memory
+  mov r15, 0
+  read_loop:
+  mov r12, KernelFileSize
+  sub r12, r15
+  sub rsp, 8*4
+  mov rax, [KernelFile]
+  mov rcx, [KernelFile]
+  mov rdx, r12
+  lea r8, [allocated_memory+r15]
+  call qword [rax+READ]
+  add rsp, 8*4
+  cmp rax, EFI_SUCCESS
+  jne error
+  add r15,r12
+  cmp r15,KernelFileSize
+  jl read_loop
+
+
+  mov rdx,allocated_memory 
   call print
 
+  mov r11,[EFI_SYSTEM_TABLE]
+  mov r12,[r11 + EFI_BOOT_SERVICES]
+
+  mov rcx,0;false
+  mov rdx, [EFI_BOOT_LOADER_HANDLE] 
+  mov r13, [BootLoaderImage]
+  mov r8, [r13 + FILE_PATH]
+
+  mov r9, allocated_memory
+  
+  sub rsp,8*6
+  mov rax, KernelImage
+  mov qword [rsp + 8*5], rax
+  mov rax, KernelFileSize
+  mov qword [rsp + 8*4], rax
+  ;call qword [r12+EFI_IMAGE_LOAD]
+  add rsp,8*6
+
+  cmp rax, EFI_SUCCESS
+  ;jne error
 
   mov rdx,all_ok_msg
   call print
@@ -212,48 +247,20 @@ error:
   jmp main_loop
   
 
-
+;rdx string
 print:
-  ;push rbp
-  ;mov rbp, rsp
-  ;sub rsp,32
   enter 32,0
 
   mov rdi,[EFI_SYSTEM_TABLE]
   mov rcx,[rdi + EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL]
   mov rax,[rcx + EFI_TEXT_STRING]
 
-  ;; Set up the shadow space. We just need to reserve 32 bytes
-  ;; on the stack, which we do by manipulating the stack pointer:
-  call rax
+  call qword [rcx + EFI_TEXT_STRING]
   
-  ;mov rsp,rbp
-  ;pop rbp
   leave
   
   ret
 
-allocate_pool:
-  ;push rbp
-  ;mov rbp,rsp
-  ;sub rsp,32
-  enter 32,0
-
- ; mov rsp, rbp
- ; pop rbp
-
-  mov rdx,memory_allocated_msg
-  call print
-
-  leave
- 
-
-  ret
-
-
-open_protocol:
-  
-  ret
 
 allocated_memory dq ?
 string du 'Fuck C',13,10,0
@@ -276,8 +283,11 @@ EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID dd 0x0964e5b22
                                       db 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b 
 
 BootLoaderImage dq ?
+KernelImage dq ?
 FileSystemProtocol dq ?
 RootDirectory dq ?
 KernelFile dq ?
 KernelFileSize dq ?
-size dq 10
+size dq 16483328
+size2 dq 10
+
