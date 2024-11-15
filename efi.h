@@ -71,7 +71,7 @@ struct SystemTable{
 	struct efi_simple_text_output_protocol *out;//console out//8
 	void *unused6;//standard error handle//8
 	void *unused7;//standard error//8
-	void *unused8;//runtime services//8 //88bytes offset
+	void *unused8;//runtime services//8 //96bytes offset
 	struct BootTable* boot_table;//boot services
 	uint64_t unused10;//number of table entries
 	void *unused11;//configuration table

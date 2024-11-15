@@ -29,28 +29,26 @@ SHADOW_SPACE = 32
 
 EFI_ALLOCATE_POOL = EFI_TABLE_HEADER + (5 * 8)
 
+DEVICE = 24
+
 entry $
-  ;push rbp
-  ;mov rbp,rsp
-  ;sub     rsp,32
-  push rbx 
-  ;enter 512,0
+ 
+  push rbx;align stack to 16 bytes
 
   mov [EFI_SYSTEM_TABLE], rdx
   mov [EFI_BOOT_LOADER_HANDLE], rcx
   
-  ;mov rax,0
-  ;mov [rsp+8*5], rax
 
   call allocate_pool
 
+  ;get loader image
   mov r11,[EFI_SYSTEM_TABLE]
   mov r12,[r11 + EFI_BOOT_SERVICES]
-  mov r13, [r12 + EFI_OPEN_PROTOCOL]
+ ; mov r13, [r12 + EFI_OPEN_PROTOCOL]
 
   mov rcx, [EFI_BOOT_LOADER_HANDLE]
   mov rdx, EFI_LOADED_IMAGE_PROTOCOL_GUID
-  mov r8, bootloader_image
+  mov r8, BootLoaderImage
   mov r9, [EFI_BOOT_LOADER_HANDLE]
 
 
@@ -61,7 +59,7 @@ entry $
   mov rax, 0
   mov qword [rsp+8*4],rax
 
-  call r13
+  call qword [r12+EFI_OPEN_PROTOCOL]
 
   add rsp,8*6
 
@@ -70,7 +68,27 @@ entry $
 
   mov rdx,open_protocol_ok
   call print
+
+  ;get file system protocol
+  mov r13, [BootLoaderImage]
+  mov rcx, [r13 + DEVICE]
+  mov rdx, EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID
+  mov r8, FileSystemProtocol
+  mov r9, [EFI_BOOT_LOADER_HANDLE]
+
+  sub rsp,8*6
+
+  mov rax, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL
+  mov qword [rsp+8*5],rax
+  mov rax, 0
+  mov qword [rsp+8*4],rax
+
+  call qword [r12+EFI_OPEN_PROTOCOL]
+
+  add rsp,8*6
  
+  cmp rax, EFI_SUCCESS
+  jne error
   
 main_loop:
 
@@ -148,4 +166,10 @@ EFI_BOOT_LOADER_HANDLE dq ?
 EFI_LOADED_IMAGE_PROTOCOL_GUID dd 0x5B1B31A1
                                 dw 0x9562,0x11d2
                                 db 0x8E,0x3F,0x00,0xA0,0xC9,0x69,0x72,0x3B
-bootloader_image dq ?
+
+EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID dd 0x0964e5b22
+                                      dw 0x6459, 0x11d2
+                                      db 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b 
+
+BootLoaderImage dq ?
+FileSystemProtocol dq ?
