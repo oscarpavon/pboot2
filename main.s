@@ -23,7 +23,7 @@ EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL = 0x00000001
 
 EFI_BOOT_SERVICES = 96
 
-EFI_MEMORY_LOADER_DATA = 1
+EFI_MEMORY_LOADER_DATA = 2
 
 SHADOW_SPACE = 32
 
@@ -157,8 +157,6 @@ entry $
   cmp rax, EFI_SUCCESS
   jne error
 
-  mov rdx, string
-  call print
   ;allocate memory for kernel file
  
   sub rsp,8*4
@@ -185,27 +183,25 @@ entry $
   cmp rax, EFI_SUCCESS
   jne error
 
- 
-  mov r15, 0
-  read_loop:
-  mov r12, KernelFileSize
-  sub r12, r15
-  sub rsp, 8*4
-  mov rax, [KernelFile]
-  mov rcx, [KernelFile]
-  mov rdx, r12
-  lea r8, [allocated_memory+r15]
-  call qword [rax+READ]
-  add rsp, 8*4
-  cmp rax, EFI_SUCCESS
-  jne error
-  add r15,r12
-  cmp r15,KernelFileSize
-  jl read_loop
 
+  ;mov word ax,[char]
+  ;mov rdx,[allocated_memory]
+  ;mov word [rdx],ax
+  ;mov word [rdx+2],0
 
-  mov rdx,allocated_memory 
+  mov rcx,[KernelFile]
+  mov rdx, KernelFileSize 
+  mov r8, [allocated_memory]
+  sub rsp,4*8
+  call qword [rcx+READ]
+  add rsp,4*8
+  
+
+  mov rdx,[allocated_memory]
   call print
+  
+  mov rdx, string
+  call print ;test read if ok
 
   mov r11,[EFI_SYSTEM_TABLE]
   mov r12,[r11 + EFI_BOOT_SERVICES]
@@ -262,7 +258,7 @@ print:
   ret
 
 
-allocated_memory dq ?
+allocated_memory rq 1
 string du 'Fuck C',13,10,0
 all_ok_msg du 'All OK',13,10,0
 
@@ -290,4 +286,5 @@ KernelFile dq ?
 KernelFileSize dq ?
 size dq 16483328
 size2 dq 10
+char du 'T'
 
