@@ -33,10 +33,16 @@ DEVICE = 24
 
 OPEN_VOLUME = 8
 
-OPEN_FILE = 8
+OPEN = 8
+READ = 32
+GET_POSITION = 48
+SET_POSITION = 56
+MAX_FILE_POSITION = 0xFFFFFFFFFFFFFFFF
 
 EFI_FILE_READ_ONLY = 0x1
 EFI_FILE_MODE_READ = 0x1
+
+
 
 entry $
  
@@ -46,7 +52,6 @@ entry $
   mov [EFI_BOOT_LOADER_HANDLE], rcx
   
 
-  call allocate_pool
 
   ;get loader image
   mov r11,[EFI_SYSTEM_TABLE]
@@ -120,11 +125,51 @@ entry $
   mov r13, EFI_FILE_READ_ONLY
   mov qword [rsp+8*4], r13
 
-  call qword [rax+OPEN_FILE]
+  call qword [rax+OPEN]
   add rsp, 8*5
    
   cmp rax, EFI_SUCCESS
   jne error_open_file
+ 
+  ;get file size
+  sub rsp, 8*4
+  mov rax, [KernelFile]
+  mov rcx, [KernelFile] 
+  mov rdx, MAX_FILE_POSITION
+  call qword [rcx+SET_POSITION]
+  add rsp, 8*4
+
+  cmp rax, EFI_SUCCESS
+  jne error
+
+
+  sub rsp, 8*4
+  mov rax, [KernelFile]
+  mov rcx, [KernelFile] 
+  mov rdx, KernelFileSize
+  call qword [rcx+GET_POSITION]
+  add rsp, 8*4
+
+  cmp rax, EFI_SUCCESS
+  jne error
+
+  ;allocate memory for kernel file
+ 
+  sub rsp,8*4
+  mov r11,[EFI_SYSTEM_TABLE]
+  mov r12,[r11 + EFI_BOOT_SERVICES]
+
+  mov rcx,EFI_MEMORY_LOADER_DATA
+  mov rdx, KernelFileSize
+  mov r8, allocated_memory
+  call qword [r12+EFI_ALLOCATE_POOL]
+  add rsp,8*4
+
+  cmp rax, EFI_SUCCESS
+  jne error
+
+  mov rdx,all_ok_msg
+  call print
 
   
 main_loop:
@@ -169,18 +214,6 @@ allocate_pool:
   ;sub rsp,32
   enter 32,0
 
-  mov r11,[EFI_SYSTEM_TABLE]
-  mov r12,[r11 + EFI_BOOT_SERVICES]
-  mov r13, [r12 + EFI_ALLOCATE_POOL]
-
-  mov rcx,EFI_MEMORY_LOADER_DATA
-  mov rdx,4;bytes to allocate
-  mov r8, allocated_memory
-
-  call r13
-  cmp rax, EFI_SUCCESS
-  jne error
-
  ; mov rsp, rbp
  ; pop rbp
 
@@ -199,6 +232,7 @@ open_protocol:
 
 allocated_memory dq ?
 string du 'Fuck C',13,10,0
+all_ok_msg du 'All OK',13,10,0
 
 kernel_name du 'vmlinuz',0
 error_msg du 'Error open loaded image',13,10,0
@@ -220,3 +254,4 @@ BootLoaderImage dq ?
 FileSystemProtocol dq ?
 RootDirectory dq ?
 KernelFile dq ?
+KernelFileSize dq ?
