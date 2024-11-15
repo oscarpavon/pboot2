@@ -136,7 +136,7 @@ entry $
   mov rax, [KernelFile]
   mov rcx, [KernelFile] 
   mov rdx, MAX_FILE_POSITION
-  call qword [rcx+SET_POSITION]
+  call qword [rax+SET_POSITION]
   add rsp, 8*4
 
   cmp rax, EFI_SUCCESS
@@ -160,13 +160,38 @@ entry $
   mov r12,[r11 + EFI_BOOT_SERVICES]
 
   mov rcx,EFI_MEMORY_LOADER_DATA
-  mov rdx, KernelFileSize
+  mov rdx, 10
   mov r8, allocated_memory
   call qword [r12+EFI_ALLOCATE_POOL]
   add rsp,8*4
 
   cmp rax, EFI_SUCCESS
   jne error
+
+  ;load kernel to memory
+
+  sub rsp, 8*4
+  mov rax, [KernelFile]
+  mov rcx, [KernelFile] 
+  mov rdx, 0;we start from the zero position
+  call qword [rax+SET_POSITION]
+  add rsp, 8*4
+
+  
+  sub rsp, 8*4
+  mov rax, [KernelFile]
+  mov rcx, [KernelFile]
+  mov rdx, KernelFileSize
+  mov r8, allocated_memory
+  call qword [rax+READ]
+  add rsp, 8*4
+  cmp rax, EFI_SUCCESS
+  jne error
+
+ 
+  mov rdx,allocated_memory
+  call print
+
 
   mov rdx,all_ok_msg
   call print
@@ -234,7 +259,7 @@ allocated_memory dq ?
 string du 'Fuck C',13,10,0
 all_ok_msg du 'All OK',13,10,0
 
-kernel_name du 'vmlinuz',0
+kernel_name du 'kernel.txt',0
 error_msg du 'Error open loaded image',13,10,0
 error_memory_msg du 'Error allocating pool',13,10,0
 memory_allocated_msg du 'Allocated pool',13,10,0
@@ -255,3 +280,4 @@ FileSystemProtocol dq ?
 RootDirectory dq ?
 KernelFile dq ?
 KernelFileSize dq ?
+size dq 10
