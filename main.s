@@ -31,6 +31,8 @@ EFI_ALLOCATE_POOL = EFI_TABLE_HEADER + (5 * 8)
 
 DEVICE = 24
 
+OPEN_VOLUME = 8
+
 entry $
  
   push rbx;align stack to 16 bytes
@@ -89,6 +91,18 @@ entry $
  
   cmp rax, EFI_SUCCESS
   jne error
+
+  ;open volume
+  mov rax, [FileSystemProtocol]
+  
+  mov rcx, [FileSystemProtocol]
+  mov rdx, RootDirectory
+  call qword [rax+OPEN_VOLUME]
+
+  cmp rax, EFI_SUCCESS
+  jne error
+
+  
   
 main_loop:
 
@@ -173,3 +187,4 @@ EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID dd 0x0964e5b22
 
 BootLoaderImage dq ?
 FileSystemProtocol dq ?
+RootDirectory dq ?
