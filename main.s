@@ -12,11 +12,13 @@ section '.text' code executable readable
 ;;return value are in rax
 ;;need 32 bytes of shadow space
 ;; shadow space is dedicated memory for saving four registers, precisely: rcx, rdx, r8 and r9
+
+include "efierror.inc"
 EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL = 64
 EFI_TEXT_STRING = 8
 
 EFI_TABLE_HEADER = 24
-EFI_SUCCESS = 0
+;EFI_SUCCESS = 0
 ;Boot Services
 EFI_OPEN_PROTOCOL = EFI_TABLE_HEADER + (32*8)
 EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL = 0x00000001
@@ -183,12 +185,7 @@ entry $
   cmp rax, EFI_SUCCESS
   jne error
 
-
-  mov word ax,[char]
-  mov rdx,[allocated_memory]
-  mov word [rdx],ax
-  mov word [rdx+2],ax
-
+  ;read kernel file to memory
   mov r14,0 
   read_kernel:
   mov rcx,[KernelFile]
@@ -196,7 +193,6 @@ entry $
   sub r13,r14
   mov [readed],r13
   mov rdx,readed
-  ;mov rdx, KernelFileSize 
   mov r15,[allocated_memory]
   lea r8, [r15+r14]
   sub rsp,4*8
@@ -208,34 +204,35 @@ entry $
   jl read_kernel
 
   continue:
-  
+ 
+  ;mov rdx,[allocated_memory]
+  ;call print
 
-  mov rdx,[allocated_memory]
-  call print
-  
-  mov rdx, string
-  call print ;test read if ok
-
+  ;image load
   mov r11,[EFI_SYSTEM_TABLE]
   mov r12,[r11 + EFI_BOOT_SERVICES]
 
   mov rcx,0;false
   mov rdx, [EFI_BOOT_LOADER_HANDLE] 
+  
   mov r13, [BootLoaderImage]
   mov r8, [r13 + FILE_PATH]
 
+  mov rax,[allocated_memory]
   mov r9, allocated_memory
+  ;mov r9,allocated_memory
+  lea r9, [rax]
   
   sub rsp,8*6
-  mov rax, KernelImage
+  mov rax, KernelImageHandle
   mov qword [rsp + 8*5], rax
   mov rax, KernelFileSize
   mov qword [rsp + 8*4], rax
-  ;call qword [r12+EFI_IMAGE_LOAD]
+  call qword [r12+EFI_IMAGE_LOAD]
   add rsp,8*6
 
   cmp rax, EFI_SUCCESS
-  ;jne error
+  jne error
 
   mov rdx,all_ok_msg
   call print
@@ -251,11 +248,39 @@ error_open_file:
   jmp main_loop
 
 error:
-  mov rdx, error_memory_msg
+  mov rbx, EFI_INVALID_PARAMETER
+  cmp qword rax,rbx
+  je invalid_parameter
+  mov rbx, EFI_NOT_FOUND
+  cmp qword rax,rbx
+  je not_found
+  mov rbx, EFI_LOAD_ERROR
+  cmp qword rax,rbx
+  je load_error
+  mov rbx, EFI_UNSUPPORTED
+  cmp qword rax,rbx
+  je unsupported
+  mov rdx, error_msg
   call print
   jmp main_loop
   
-
+invalid_parameter:
+  mov rdx, invalid_parameter_msg
+  call print
+  jmp main_loop
+unsupported:
+  mov rdx, unsupported_msg
+  call print
+  jmp main_loop
+not_found:
+  mov rdx, not_found_msg
+  call print
+  jmp main_loop
+load_error:
+  mov rdx, load_error_msg
+  call print
+  jmp main_loop
+  
 ;rdx string
 print:
   enter 32,0
@@ -270,14 +295,19 @@ print:
   
   ret
 
+  ;mov word ax,[char]
+  ;mov rdx,[allocated_memory]
+  ;mov word [rdx],ax
+  ;mov word [rdx+2],ax
 
 allocated_memory rq 1
 string du 'Fuck C',13,10,0
 all_ok_msg du 'All OK',13,10,0
 
-kernel_name du 'kernel.txt',0
-error_msg du 'Error open loaded image',13,10,0
+kernel_name du 'vmlinuz',0
+error_open_loaded_image_msg du 'Error open loaded image',13,10,0
 error_memory_msg du 'Error allocating pool',13,10,0
+error_msg du 'Error',13,10,0
 memory_allocated_msg du 'Allocated pool',13,10,0
 open_protocol_ok du 'Open protocol OK',13,10,0
 error_open_file_msg du 'Error open file',13,10,0
@@ -292,12 +322,19 @@ EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID dd 0x0964e5b22
                                       db 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b 
 
 BootLoaderImage dq ?
-KernelImage dq ?
+KernelImageHandle dq ?
 FileSystemProtocol dq ?
 RootDirectory dq ?
 KernelFile dq ?
 KernelFileSize dq ?
+DevicePathProtocol rq 1
 size dq 16483328
 size2 dq 10
 char du 'T'
 readed rq 1
+
+;error messages
+unsupported_msg du 'Unsupported',13,10,0
+invalid_parameter_msg du 'Invalid Parameter',13,10,0
+not_found_msg du 'Not found',13,10,0
+load_error_msg du 'Load error',13,10,0
