@@ -169,8 +169,6 @@ entry $
   add rsp,4*8
   cmp rax,EFI_SUCCESS
   jne error
-  mov rax,[readed]
-  call print_decimal
   mov rax, [readed]
   mov rdx, [KernelFileSize]
   cmp rax,rdx
@@ -207,6 +205,18 @@ read_continue:
   mov rdx,[allocated_memory]
   ;call print
 
+  mov rax,[KernelFileSize]
+  call print_decimal
+
+
+  ;create device memory path
+  lea rax,[memory_device_path]
+  mov rdx, allocated_memory
+  mov qword [rax+OFFSET_START_ADDRESS],rdx
+  mov rcx,[KernelFileSize]
+  lea rdx,[allocated_memory+rcx]
+  mov qword [rax+OFFSET_END_ADDRESS],rdx
+
   ;image load
   mov r11,[EFI_SYSTEM_TABLE]
   mov r12,[r11 + EFI_BOOT_SERVICES]
@@ -214,12 +224,13 @@ read_continue:
   mov rcx,0;false
   mov rdx, [EFI_BOOT_LOADER_HANDLE] 
   
-  mov r13, [BootLoaderImage]
-  mov r8, [r13 + FILE_PATH]
+  ;mov r13, [BootLoaderImage]
+  ;mov r8, [r13 + FILE_PATH]
+  mov r8,memory_device_path
 
 
   mov r9,allocated_memory
-  mov r9,0
+
 
   sub rsp,8*6
   mov rax, KernelImageHandle
@@ -350,6 +361,20 @@ EFI_LOADED_IMAGE_PROTOCOL_GUID dd 0x5B1B31A1
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID dd 0x0964e5b22
                                       dw 0x6459, 0x11d2
                                       db 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b 
+
+
+memory_device_path db EFI_HARDWARE_DEVICE_PATH
+                    db EFI_MEMORY_MAPPED_DEVICE_PATH
+                    db 24;size of memory device path
+                    db 0;right shiftted 8 bit
+                    dd EFI_MEMORY_LOADER_DATA
+                    dq 0;start address
+                    dq 0;end address
+                    ;end device path
+                    db EFI_END_HARDWARE_DEVICE_PATH
+                    db EFI_END_DEVICE_INSTANCE_PATH
+                    db 4;size of device path
+                    db 0;right 4 siftted 8 bit
 
 BootLoaderImage dq ?
 KernelImageHandle dq ?
