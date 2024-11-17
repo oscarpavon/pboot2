@@ -25,7 +25,7 @@ EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL = 0x00000001
 
 EFI_BOOT_SERVICES = 96
 
-EFI_MEMORY_LOADER_DATA = 2
+EFI_MEMORY_LOADER_DATA = 1
 
 SHADOW_SPACE = 32
 
@@ -40,6 +40,7 @@ FILE_PATH = 32
 OPEN_VOLUME = 8
 
 OPEN = 8
+CLOSE = 16
 READ = 32
 GET_POSITION = 48
 SET_POSITION = 56
@@ -53,10 +54,9 @@ EFI_FILE_MODE_READ = 0x1
 entry $
  
   push rbx;align stack to 16 bytes
-
+  
   mov [EFI_SYSTEM_TABLE], rdx
   mov [EFI_BOOT_LOADER_HANDLE], rcx
-  
 
 
   ;get loader image
@@ -159,6 +159,9 @@ entry $
   cmp rax, EFI_SUCCESS
   jne error
 
+  mov rax,[KernelFileSize]
+  ;call print_decimal
+
   ;allocate memory for kernel file
  
   sub rsp,8*4
@@ -166,7 +169,7 @@ entry $
   mov r12,[r11 + EFI_BOOT_SERVICES]
 
   mov rcx,EFI_MEMORY_LOADER_DATA
-  mov rdx, KernelFileSize
+  mov rdx, [KernelFileSize]
   mov r8, allocated_memory
   call qword [r12+EFI_ALLOCATE_POOL]
   add rsp,8*4
@@ -186,26 +189,39 @@ entry $
   jne error
 
   ;read kernel file to memory
+
   mov r14,0 
   read_kernel:
   mov rcx,[KernelFile]
-  mov r13,KernelFileSize
+  mov r13,[KernelFileSize]
   sub r13,r14
-  mov [readed],r13
+  mov [readed],r13;total to read
   mov rdx,readed
   mov r15,[allocated_memory]
   lea r8, [r15+r14]
+  ;mov r8,allocated_memory
   sub rsp,4*8
   call qword [rcx+READ]
   add rsp,4*8
-  add r14,readed
-  cmp r14,KernelFileSize
+  cmp rax,EFI_SUCCESS
+  jne error
+  mov rax,[readed]
+  call print_decimal
+  mov rax, [readed]
+  mov rdx, [KernelFileSize]
+  cmp rax,rdx
+  jne print_not_readed
+
+read_continue:
+  add r14,[readed]
+  cmp r14,[KernelFileSize]
   je continue
   jl read_kernel
 
+
   continue:
- 
-  ;mov rdx,[allocated_memory]
+  
+  mov rdx,[allocated_memory]
   ;call print
 
   ;image load
@@ -218,15 +234,14 @@ entry $
   mov r13, [BootLoaderImage]
   mov r8, [r13 + FILE_PATH]
 
-  mov rax,[allocated_memory]
-  mov r9, allocated_memory
-  ;mov r9,allocated_memory
-  lea r9, [rax]
-  
+
+  mov r9,allocated_memory
+  mov r9,0
+
   sub rsp,8*6
   mov rax, KernelImageHandle
   mov qword [rsp + 8*5], rax
-  mov rax, KernelFileSize
+  mov rax, [KernelFileSize]
   mov qword [rsp + 8*4], rax
   call qword [r12+EFI_IMAGE_LOAD]
   add rsp,8*6
@@ -241,6 +256,12 @@ entry $
 main_loop:
 
   jmp $
+
+
+print_not_readed:
+  mov rdx,kernel_not_readed_msg
+  call print
+  jmp continue
 
 error_open_file:
   mov rdx, error_open_file_msg
@@ -295,16 +316,42 @@ print:
   
   ret
 
+
+
+;eax number
+print_decimal:
+	mov rcx,18;max digits count
+divide:
+	xor edx,edx
+	mov ebx,10
+	div ebx
+	add edx,'0'
+	mov word [decimal_buffer+rcx],dx
+	sub rcx,2
+	cmp eax,9
+	jg divide
+	add eax,'0'
+	mov word [decimal_buffer+rcx],ax
+  mov rdx,decimal_buffer
+  call print
+  ret
+
   ;mov word ax,[char]
   ;mov rdx,[allocated_memory]
   ;mov word [rdx],ax
   ;mov word [rdx+2],ax
 
-allocated_memory rq 1
+decimal_buffer du '000000000',13,10,0
+decimal du 'A',13,10,0
+
+allocated_memory dq 0,0
+allocated_memory2 rq 1
 string du 'Fuck C',13,10,0
 all_ok_msg du 'All OK',13,10,0
 
-kernel_name du 'vmlinuz',0
+kernel_not_readed_msg du 'Kernel not readed',13,10,0
+
+kernel_name du 'bootloader',0
 error_open_loaded_image_msg du 'Error open loaded image',13,10,0
 error_memory_msg du 'Error allocating pool',13,10,0
 error_msg du 'Error',13,10,0
@@ -328,10 +375,11 @@ RootDirectory dq ?
 KernelFile dq ?
 KernelFileSize dq ?
 DevicePathProtocol rq 1
-size dq 16483328
+size dd 16483328
 size2 dq 10
 char du 'T'
 readed rq 1
+readed_count rq 1
 
 ;error messages
 unsupported_msg du 'Unsupported',13,10,0
