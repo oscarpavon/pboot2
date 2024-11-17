@@ -1,5 +1,5 @@
 format pe64 efi
-section '.text' code executable readable
+include "efi_constants.inc"
 
 
 ;[rsp+8*0] ; shadow space for parm one (volitile)
@@ -13,43 +13,7 @@ section '.text' code executable readable
 ;;need 32 bytes of shadow space
 ;; shadow space is dedicated memory for saving four registers, precisely: rcx, rdx, r8 and r9
 
-include "efierror.inc"
-EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL = 64
-EFI_TEXT_STRING = 8
-
-EFI_TABLE_HEADER = 24
-;EFI_SUCCESS = 0
-;Boot Services
-EFI_OPEN_PROTOCOL = EFI_TABLE_HEADER + (32*8)
-EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL = 0x00000001
-
-EFI_BOOT_SERVICES = 96
-
-EFI_MEMORY_LOADER_DATA = 1
-
-SHADOW_SPACE = 32
-
-EFI_ALLOCATE_POOL = EFI_TABLE_HEADER + (5 * 8)
-
-EFI_IMAGE_LOAD = EFI_ALLOCATE_POOL + (17 * 8)
-EFI_IMAGE_START = EFI_ALLOCATE_POOL + (18 * 8)
-
-DEVICE = 24
-FILE_PATH = 32
-
-OPEN_VOLUME = 8
-
-OPEN = 8
-CLOSE = 16
-READ = 32
-GET_POSITION = 48
-SET_POSITION = 56
-MAX_FILE_POSITION = 0xFFFFFFFFFFFFFFFF
-
-EFI_FILE_READ_ONLY = 0x1
-EFI_FILE_MODE_READ = 0x1
-
-
+section '.text' code executable readable
 
 entry $
  
