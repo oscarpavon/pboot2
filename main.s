@@ -208,6 +208,20 @@ read_continue:
   mov rax,[KernelFileSize]
   call print_decimal
 
+ 
+  mov rdx,error_msg
+  call print
+  mov rdx,error_msg
+  call print
+
+  mov rdi,0xFFFF
+  call print_hex
+
+  mov rdx,error_msg
+  call print
+
+  jmp $
+
 
   ;create device memory path
   lea rax,[memory_device_path]
@@ -314,7 +328,7 @@ print:
 
 ;eax number
 print_decimal:
-	mov rcx,18;max digits count
+	mov rcx,16;max digits count
 divide:
 	xor edx,edx
 	mov ebx,10
@@ -330,12 +344,41 @@ divide:
   call print
   ret
 
+;rdi value
+;rsi amount of bits 
+;rdx destination buffer
+;rax amount of bytes written to output buffer
+print_hex:
+	mov rsi,64
+	lea rdx,[hex_buffer]
+	xor rax,rax
+	shr rsi,2 ;divide by 4
+	add rdx,rsi
+	nibble:
+		lea r9,[hex_table]
+		mov bl,dil
+		and bl,0x0f
+		add r9b,bl
+		mov bl,[r9]
+		sub rdx,2
+		mov word [rdx],bx
+		shr rdi,4
+		add rax,1
+		cmp rax,rsi
+		jl nibble
+
+	mov rdx,hex_buffer
+	call print
+
+	ret
   ;mov word ax,[char]
   ;mov rdx,[allocated_memory]
   ;mov word [rdx],ax
   ;mov word [rdx+2],ax
 
 decimal_buffer du '000000000',13,10,0
+hex_table db '0123456789abcdef'
+hex_buffer du '                ',13,10,0
 decimal du 'A',13,10,0
 
 allocated_memory dq 0,0
