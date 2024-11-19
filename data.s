@@ -14,7 +14,7 @@ all_ok_msg du 'All OK',13,10,0
 
 kernel_not_readed_msg du 'Kernel not readed',13,10,0
 
-kernel_name du 'bootloader',0
+kernel_name du 'helloefi.efi',0
 error_open_loaded_image_msg du 'Error open loaded image',13,10,0
 error_memory_msg du 'Error allocating pool',13,10,0
 error_msg du 'Error',13,10,0
@@ -23,13 +23,19 @@ open_protocol_ok du 'Open protocol OK',13,10,0
 error_open_file_msg du 'Error open file',13,10,0
 EFI_SYSTEM_TABLE dq ?
 EFI_BOOT_LOADER_HANDLE dq ?
+
+;Protocols GUID
 EFI_LOADED_IMAGE_PROTOCOL_GUID dd 0x5B1B31A1
                                 dw 0x9562,0x11d2
                                 db 0x8E,0x3F,0x00,0xA0,0xC9,0x69,0x72,0x3B
 
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID dd 0x0964e5b22
                                       dw 0x6459, 0x11d2
-                                      db 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b 
+                                      db 0x8e,0x39,0x00,0xa0,0xc9,0x69,0x72,0x3b
+
+EFI_DEVICE_PATH_PROTOCOL_GUID dd 0x09576e91
+                              dw 0x6d3f,0x11d2
+                              db 0x8e,0x39,0x00,0xa0,0xc9,0x69,0x72,0x3b
 
 
 memory_device_path db EFI_HARDWARE_DEVICE_PATH
@@ -41,7 +47,7 @@ memory_device_path db EFI_HARDWARE_DEVICE_PATH
                     dq 0;end address
                     ;end device path
                     db EFI_END_HARDWARE_DEVICE_PATH
-                    db EFI_END_DEVICE_INSTANCE_PATH
+                    db EFI_END_ENTIRE_DEVICE_PATH
                     db 4;size of device path
                     db 0;right 4 siftted 8 bit
 
