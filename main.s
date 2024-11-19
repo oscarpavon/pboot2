@@ -209,38 +209,42 @@ read_continue:
   call print_decimal
 
  
-  mov rdx,error_msg
-  call print
-  mov rdx,error_msg
-  call print
 
   mov rdi,[number]
   call print_hex
 
-  mov rdi,0xFF
+  mov rdi,0x2FFFFFFFFFFFFFF0
   call print_hex
 
-  mov rdx,error_msg
-  call print
+  mov rdi,[KernelFileSize]
+  call print_hex
+
   
+  mov rdi,allocated_memory
+  call print_hex
 
-  ;mov rdi,KernelFileSize
-  ;call print_hex
+  mov rdi,allocated_memory2
+  call print_hex
 
+  mov rdi,[allocated_memory]
+  call print_hex
 
-  ;call print_decimal
-
-
-  jmp $
+  mov rdi,0xff
+  call print_hex
 
   ;create device memory path
   lea rax,[memory_device_path]
-  mov rdx, allocated_memory
+  mov rdx, [allocated_memory]
   mov qword [rax+OFFSET_START_ADDRESS],rdx
   mov rcx,[KernelFileSize]
-  lea rdx,[allocated_memory+rcx]
+  mov rax,[allocated_memory]
+  mov rdx,[rax+rcx]
   mov qword [rax+OFFSET_END_ADDRESS],rdx
 
+  mov rdi,rdx
+  ;call print_hex
+
+  jmp $
   ;image load
   mov r11,[EFI_SYSTEM_TABLE]
   mov r12,[r11 + EFI_BOOT_SERVICES]
@@ -248,12 +252,13 @@ read_continue:
   mov rcx,0;false
   mov rdx, [EFI_BOOT_LOADER_HANDLE] 
   
-  ;mov r13, [BootLoaderImage]
-  ;mov r8, [r13 + FILE_PATH]
+  ;mov r8,0
+  mov r13, [BootLoaderImage]
+  mov r8, [r13 + FILE_PATH]
+
   mov r8,memory_device_path
 
-
-  mov r9,allocated_memory
+  mov r9,[allocated_memory]
 
 
   sub rsp,8*6
@@ -334,52 +339,8 @@ print:
   ret
 
 
+include "std.s"
 
-;eax number
-print_decimal:
-	mov rcx,16;max digits count
-divide:
-	xor edx,edx
-	mov ebx,10
-	div ebx
-	add edx,'0'
-	mov word [decimal_buffer+rcx],dx
-	sub rcx,2
-	cmp eax,9
-	jg divide
-	add eax,'0'
-	mov word [decimal_buffer+rcx],ax
-  mov rdx,decimal_buffer
-  call print
-  ret
-
-;rdi value
-;rsi amount of bits 
-;rdx destination buffer
-;rax amount of bytes written to output buffer
-print_hex:
-	mov rsi,64
-	lea rdx,[hex_buffer]
-	xor rax,rax
-	shr rsi,2 ;divide by 4
-	add rdx,rsi
-	nibble:
-		lea r9,[hex_table]
-		mov bl,dil
-		and bl,0x0f
-		add r9b,bl
-		mov bl,[r9]
-		sub rdx,2
-		mov word [rdx],bx
-		shr rdi,4
-		add rax,1
-		cmp rax,rsi
-		jl nibble
-
-	mov rdx,hex_buffer
-	call print
-
-	ret
   ;mov word ax,[char]
   ;mov rdx,[allocated_memory]
   ;mov word [rdx],ax

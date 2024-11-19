@@ -1,13 +1,14 @@
 
 hex_table db '0123456789abcdef'
 decimal_buffer du '000000000',13,10,0
-hex_buffer du '                ',13,10,0
+hex_buffer db 'FFFFFFFFFFFFFFFF'
+hex_buffer_unicode du '0000000000000000',13,10,0
 decimal du 'A',13,10,0
 
 number dq 10
 
-allocated_memory dq 0,0
-allocated_memory2 rq 1
+allocated_memory dq 0
+allocated_memory2 dq 1
 string du 'Fuck C',13,10,0
 all_ok_msg du 'All OK',13,10,0
 
