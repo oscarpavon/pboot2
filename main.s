@@ -23,6 +23,7 @@ entry $
   mov [EFI_BOOT_LOADER_HANDLE], rcx
 
 
+
   ;get loader image
   mov r11,[EFI_SYSTEM_TABLE]
   mov r12,[r11 + EFI_BOOT_SERVICES]
@@ -48,8 +49,13 @@ entry $
   cmp rax, EFI_SUCCESS
   jne error
 
-  mov rdx,open_protocol_ok
+  mov rdx,got_loaded_image
   call print
+
+
+  call get_device_path
+
+  jmp open_volume
 
   ;get file system protocol
   mov r13, [BootLoaderImage]
@@ -71,7 +77,8 @@ entry $
  
   cmp rax, EFI_SUCCESS
   jne error
-
+  
+  open_volume:
   ;open volume
   sub rsp, 8*4
   mov rax, [FileSystemProtocol]
@@ -84,9 +91,12 @@ entry $
 
   cmp rax, EFI_SUCCESS
   jne error
+  
+  mov rdx,volume_opened
+  call print
 
   ;open file 
-  sub rsp, 8*5
+  sub rsp, 8*6
   mov rax, [RootDirectory]
   mov rcx, [RootDirectory] 
   mov rdx, KernelFile
@@ -96,10 +106,13 @@ entry $
   mov qword [rsp+8*4], r13
 
   call qword [rax+OPEN]
-  add rsp, 8*5
+  add rsp, 8*6
    
   cmp rax, EFI_SUCCESS
   jne error_open_file
+
+  mov rdx,file_opened
+  call print
  
   ;get file size
   sub rsp, 8*4
@@ -181,8 +194,6 @@ read_continue:
   jl read_kernel
 
 
-  continue:
-  call get_device_path
 
  
   ;close kernel file after reading
@@ -204,6 +215,8 @@ read_continue:
   jne error
   
   
+  continue:
+
   mov rdx,[allocated_memory]
   ;call print
 
@@ -211,29 +224,6 @@ read_continue:
   call print_decimal
 
  
-
-  mov rdi,[number]
-  call print_hex
-
-  mov rdi,0x2FFFFFFFFFFFFFF0
-  call print_hex
-
-  mov rdi,[KernelFileSize]
-  call print_hex
-
-  
-  mov rdi,allocated_memory
-  call print_hex
-
-  mov rdi,allocated_memory2
-  call print_hex
-
-  mov rdi,[allocated_memory]
-  call print_hex
-
-  mov rdi,0xff
-  call print_hex
-
   ;create device memory path
   lea rax,[memory_device_path]
   mov rdx, [allocated_memory]
@@ -269,6 +259,10 @@ read_continue:
   cmp rax, EFI_SUCCESS
   jne error
 
+
+
+
+
   mov rdx,all_ok_msg
   call print
 
@@ -285,8 +279,12 @@ print_not_readed:
   jmp continue
 
 error_open_file:
+  push rax
   mov rdx, error_open_file_msg
   call print
+  pop rax
+  cmp rax,EFI_SUCCESS
+  jne error
   jmp main_loop
 
 error:
@@ -349,10 +347,10 @@ get_handles:
   mov r8,0
   mov r9,handles_size
 
-  sub rsp,5*8
+  sub rsp,6*8
   mov qword [rsp+4*8],handles
   call qword [r14+EFI_LOCATE_HANDLE]
-  add rsp,5*8
+  add rsp,6*8
 
   pop rbp
   ret
@@ -367,8 +365,6 @@ get_device_path:
   jne error
 
 find_handle:
-  mov rdx,buffer_too_small_msg
-  call print
 
 
   call get_handles
@@ -380,6 +376,15 @@ find_handle:
   mov r14,[r15+EFI_BOOT_SERVICES]
   
   mov rcx,[handles]
+  mov rdx,EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID
+  mov r8,FileSystemProtocol
+  sub rsp,32
+  call qword [r14+EFI_HANDLE_PROTOCOL]
+  add rsp,32
+  cmp rax,EFI_SUCCESS
+  jne error
+
+  mov rcx,[handles]
   mov rdx,EFI_DEVICE_PATH_PROTOCOL_GUID
   mov r8,FileSystemDevicePath
   sub rsp,32
@@ -388,6 +393,8 @@ find_handle:
   cmp rax,EFI_SUCCESS
   jne error
 
+  mov rdx,got_device_path
+  call print
 
   pop rbp
   ret
@@ -404,3 +411,5 @@ handles dq ?
 FileSystemDevicePath dq ?
 
 buffer_too_small_msg du 'Buffer too small',13,10,0
+
+

@@ -14,13 +14,14 @@ all_ok_msg du 'All OK',13,10,0
 
 kernel_not_readed_msg du 'Kernel not readed',13,10,0
 
-kernel_name du 'bootloader',0
-error_open_loaded_image_msg du 'Error open loaded image',13,10,0
-error_memory_msg du 'Error allocating pool',13,10,0
-error_msg du 'Error',13,10,0
+kernel_name du 'vmlinuz',0
 memory_allocated_msg du 'Allocated pool',13,10,0
 open_protocol_ok du 'Open protocol OK',13,10,0
-error_open_file_msg du 'Error open file',13,10,0
+got_loaded_image du "Got loaded image",13,10,0
+volume_opened du "Volume opened",13,10,0
+file_opened du "File opened",13,10,0
+got_device_path du "Got device path",13,10,0
+
 EFI_SYSTEM_TABLE dq ?
 EFI_BOOT_LOADER_HANDLE dq ?
 
@@ -69,3 +70,8 @@ unsupported_msg du 'Unsupported',13,10,0
 invalid_parameter_msg du 'Invalid Parameter',13,10,0
 not_found_msg du 'Not found',13,10,0
 load_error_msg du 'Load error',13,10,0
+
+error_open_loaded_image_msg du 'Error open loaded image',13,10,0
+error_memory_msg du 'Error allocating pool',13,10,0
+error_msg du 'Error',13,10,0
+error_open_file_msg du 'Error open file',13,10,0

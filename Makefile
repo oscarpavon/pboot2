@@ -24,5 +24,5 @@ install:
 	cp BOOTX64.EFI $(virtual_machine_path)/BOOTX64.EFI
 
 release:
-	cp BOOTX64.EFI /boot/EFI/PAVON/pavonx64.efi
+	cp BOOTX64.EFI /boot/EFI/asm/asmboot.efi
 
