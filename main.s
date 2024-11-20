@@ -182,6 +182,8 @@ read_continue:
 
 
   continue:
+  call get_device_path
+
  
   ;close kernel file after reading
   add rsp,32
@@ -244,7 +246,6 @@ read_continue:
   mov rdi,rdx
   ;call print_hex
 
-  jmp $
   ;image load
   mov r11,[EFI_SYSTEM_TABLE]
   mov r12,[r11 + EFI_BOOT_SERVICES]
@@ -252,11 +253,7 @@ read_continue:
   mov rcx,0;false
   mov rdx, [EFI_BOOT_LOADER_HANDLE] 
   
-  ;mov r8,0
-  mov r13, [BootLoaderImage]
-  mov r8, [r13 + FILE_PATH]
-
-  mov r8,memory_device_path
+  mov r8, [FileSystemDevicePath]
 
   mov r9,[allocated_memory]
 
@@ -279,6 +276,7 @@ read_continue:
 main_loop:
 
   jmp $
+
 
 
 print_not_readed:
@@ -338,12 +336,71 @@ print:
   
   ret
 
+;https://forum.osdev.org/viewtopic.php?t=50623
+
+get_handles:
+  push rbp
+
+  mov r15,[EFI_SYSTEM_TABLE] 
+  mov r14,[r15+EFI_BOOT_SERVICES]
+ 
+  mov rcx,LOCATE_BY_PROTOCOL
+  mov rdx,EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID
+  mov r8,0
+  mov r9,handles_size
+
+  sub rsp,5*8
+  mov qword [rsp+4*8],handles
+  call qword [r14+EFI_LOCATE_HANDLE]
+  add rsp,5*8
+
+  pop rbp
+  ret
+
+get_device_path:
+  push rbp
+
+  call get_handles 
+  mov rbx,EFI_BUFFER_TOO_SMALL
+  cmp rax,rbx
+  je find_handle
+  jne error
+
+find_handle:
+  mov rdx,buffer_too_small_msg
+  call print
+
+
+  call get_handles
+  cmp rax,EFI_SUCCESS
+  jne error
+  
+  
+  mov r15,[EFI_SYSTEM_TABLE] 
+  mov r14,[r15+EFI_BOOT_SERVICES]
+  
+  mov rcx,[handles]
+  mov rdx,EFI_DEVICE_PATH_PROTOCOL_GUID
+  mov r8,FileSystemDevicePath
+  sub rsp,32
+  call qword [r14+EFI_HANDLE_PROTOCOL]
+  add rsp,32
+  cmp rax,EFI_SUCCESS
+  jne error
+
+
+  pop rbp
+  ret
+
+
+
 
 include "std.s"
 
-  ;mov word ax,[char]
-  ;mov rdx,[allocated_memory]
-  ;mov word [rdx],ax
-  ;mov word [rdx+2],ax
-
 include "data.s"
+
+handles_size dq 0
+handles dq ?
+FileSystemDevicePath dq ?
+
+buffer_too_small_msg du 'Buffer too small',13,10,0

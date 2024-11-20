@@ -14,7 +14,7 @@ all_ok_msg du 'All OK',13,10,0
 
 kernel_not_readed_msg du 'Kernel not readed',13,10,0
 
-kernel_name du 'helloefi.efi',0
+kernel_name du 'bootloader',0
 error_open_loaded_image_msg du 'Error open loaded image',13,10,0
 error_memory_msg du 'Error allocating pool',13,10,0
 error_msg du 'Error',13,10,0
