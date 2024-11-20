@@ -125,6 +125,9 @@ entry $
   cmp rax, EFI_SUCCESS
   jne error
 
+  mov rdx,setted_max_file
+  call print
+
 
   sub rsp, 8*4
   mov rax, [KernelFile]
@@ -138,6 +141,9 @@ entry $
 
   mov rax,[KernelFileSize]
   ;call print_decimal
+
+  mov rdx,got_file_size
+  call print
 
   ;allocate memory for kernel file
  
@@ -153,6 +159,9 @@ entry $
 
   cmp rax, EFI_SUCCESS
   jne error
+
+  mov rdx,memory_allocated_msg
+  call print
 
   ;load kernel to memory
 
@@ -176,7 +185,6 @@ entry $
   mov rdx,readed
   mov r15,[allocated_memory]
   lea r8, [r15+r14]
-  ;mov r8,allocated_memory
   sub rsp,4*8
   call qword [rcx+READ]
   add rsp,4*8
@@ -188,12 +196,13 @@ entry $
   jne print_not_readed
 
 read_continue:
+  mov rdx,file_loaded_to_memory
+  call print
+
   add r14,[readed]
   cmp r14,[KernelFileSize]
   je continue
   jl read_kernel
-
-
 
  
   ;close kernel file after reading
@@ -215,13 +224,12 @@ read_continue:
   jne error
   
   
-  continue:
 
   mov rdx,[allocated_memory]
   ;call print
 
   mov rax,[KernelFileSize]
-  call print_decimal
+  ;call print_decimal
 
  
   ;create device memory path
@@ -235,6 +243,8 @@ read_continue:
 
   mov rdi,rdx
   ;call print_hex
+
+  continue:
 
   ;image load
   mov r11,[EFI_SYSTEM_TABLE]
@@ -259,8 +269,21 @@ read_continue:
   cmp rax, EFI_SUCCESS
   jne error
 
+  mov rdx,image_loaded
+  call print
 
+  ;start image
+  mov r11,[EFI_SYSTEM_TABLE]
+  mov r12,[r11 + EFI_BOOT_SERVICES]
 
+  mov rcx, [KernelImageHandle]
+  mov rdx,0
+  mov r8,0
+  sub rsp,32
+  call qword [r12 + EFI_IMAGE_START]
+  add rsp,32
+  cmp rax,EFI_SUCCESS
+  jne error
 
 
   mov rdx,all_ok_msg

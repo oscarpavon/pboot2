@@ -18,7 +18,11 @@ kernel_name du 'vmlinuz',0
 memory_allocated_msg du 'Allocated pool',13,10,0
 open_protocol_ok du 'Open protocol OK',13,10,0
 got_loaded_image du "Got loaded image",13,10,0
+got_file_size du "Got file size",13,10,0
+file_loaded_to_memory du "File loaded to memory",13,10,0
 volume_opened du "Volume opened",13,10,0
+image_loaded du "Image loaded",13,10,0
+setted_max_file du "Setted max file",13,10,0
 file_opened du "File opened",13,10,0
 got_device_path du "Got device path",13,10,0
 
