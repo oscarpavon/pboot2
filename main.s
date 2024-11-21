@@ -51,30 +51,6 @@ entry $
 
   call get_device_path
 
-  jmp open_volume
-
-  ;get file system protocol
-  mov r13, [BootLoaderImage]
-  mov rcx, [r13 + DEVICE]
-  mov rdx, EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID
-  mov r8, FileSystemProtocol
-  mov r9, [EFI_BOOT_LOADER_HANDLE]
-
-  sub rsp,8*6
-
-  mov rax, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL
-  mov qword [rsp+8*5],rax
-  mov rax, 0
-  mov qword [rsp+8*4],rax
-
-  call qword [r12+EFI_OPEN_PROTOCOL]
-
-  add rsp,8*6
- 
-  cmp rax, EFI_SUCCESS
-  jne error
-  
-  open_volume:
   ;open volume
   sub rsp, 8*4
   mov rax, [FileSystemProtocol]
