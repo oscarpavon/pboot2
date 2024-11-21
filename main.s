@@ -298,24 +298,71 @@ load_error:
   
 ;rdx string
 print:
-  enter 32,0
+  push rbx
 
   mov r15,[EFI_SYSTEM_TABLE]
-  mov rcx,[r15 + EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL]
+  mov rcx,[r15 + EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL];rcx need to be Simple Text Output
 
+  sub rsp,32
   call qword [rcx + EFI_TEXT_STRING]
-  
-  leave
-  
+  add rsp,32
+
+  pop rbx
+
   ret
 
-;https://forum.osdev.org/viewtopic.php?t=50623
+
+get_device_path:
+  push rbp
+
+  call get_handles 
+  mov rbx,EFI_BUFFER_TOO_SMALL
+  cmp rax,rbx
+  je find_handle
+  jne error
+
+find_handle:
+  
+  call get_handles
+  cmp rax,EFI_SUCCESS
+  jne error
+  
+  mov r14,[boot_services]
+  
+  ;get file system protocol
+  mov rcx,[handles]
+  mov rdx,EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID
+  mov r8,FileSystemProtocol
+
+  sub rsp,32
+  call qword [r14+EFI_HANDLE_PROTOCOL]
+  add rsp,32
+
+  cmp rax,EFI_SUCCESS
+  jne error
+
+  ;get device path protocol
+  mov rcx,[handles]
+  mov rdx,EFI_DEVICE_PATH_PROTOCOL_GUID
+  mov r8,FileSystemDevicePath
+
+  sub rsp,32
+  call qword [r14+EFI_HANDLE_PROTOCOL]
+  add rsp,32
+
+  cmp rax,EFI_SUCCESS
+  jne error
+
+  mov rdx,got_device_path
+  call print
+
+  pop rbp
+  ret
 
 get_handles:
   push rbp
 
-  mov r15,[EFI_SYSTEM_TABLE] 
-  mov r14,[r15+EFI_BOOT_SERVICES]
+  mov r14,[boot_services]
  
   mov rcx,LOCATE_BY_PROTOCOL
   mov rdx,EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID
@@ -329,51 +376,6 @@ get_handles:
 
   pop rbp
   ret
-
-get_device_path:
-  push rbp
-
-  call get_handles 
-  mov rbx,EFI_BUFFER_TOO_SMALL
-  cmp rax,rbx
-  je find_handle
-  jne error
-
-find_handle:
-
-
-  call get_handles
-  cmp rax,EFI_SUCCESS
-  jne error
-  
-  
-  mov r15,[EFI_SYSTEM_TABLE] 
-  mov r14,[r15+EFI_BOOT_SERVICES]
-  
-  mov rcx,[handles]
-  mov rdx,EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID
-  mov r8,FileSystemProtocol
-  sub rsp,32
-  call qword [r14+EFI_HANDLE_PROTOCOL]
-  add rsp,32
-  cmp rax,EFI_SUCCESS
-  jne error
-
-  mov rcx,[handles]
-  mov rdx,EFI_DEVICE_PATH_PROTOCOL_GUID
-  mov r8,FileSystemDevicePath
-  sub rsp,32
-  call qword [r14+EFI_HANDLE_PROTOCOL]
-  add rsp,32
-  cmp rax,EFI_SUCCESS
-  jne error
-
-  mov rdx,got_device_path
-  call print
-
-  pop rbp
-  ret
-
 
 
 
