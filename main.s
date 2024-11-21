@@ -111,22 +111,20 @@ entry $
   cmp rax, EFI_SUCCESS
   jne error
 
-  mov rax,[KernelFileSize]
-  ;call print_decimal
-
   mov rdx,got_file_size
   call print
 
   ;allocate memory for kernel file
  
+  mov r12,[boot_services]
+
   sub rsp,8*4
-  mov r11,[EFI_SYSTEM_TABLE]
-  mov r12,[r11 + EFI_BOOT_SERVICES]
 
   mov rcx,EFI_MEMORY_LOADER_DATA
   mov rdx, [KernelFileSize]
   mov r8, allocated_memory
   call qword [r12+EFI_ALLOCATE_POOL]
+
   add rsp,8*4
 
   cmp rax, EFI_SUCCESS
@@ -138,11 +136,13 @@ entry $
   ;load kernel to memory
 
   sub rsp, 8*4
-  mov rax, [KernelFile]
+
   mov rcx, [KernelFile] 
   mov rdx, 0;we start from the zero position
-  call qword [rax+SET_POSITION]
+  call qword [rcx+SET_POSITION]
+
   add rsp, 8*4
+
   cmp rax, EFI_SUCCESS
   jne error
 
@@ -195,32 +195,11 @@ read_continue:
   cmp rax,EFI_SUCCESS
   jne error
   
-  
-
-  mov rdx,[allocated_memory]
-  ;call print
-
-  mov rax,[KernelFileSize]
-  ;call print_decimal
-
  
-  ;create device memory path
-  lea rax,[memory_device_path]
-  mov rdx, [allocated_memory]
-  mov qword [rax+OFFSET_START_ADDRESS],rdx
-  mov rcx,[KernelFileSize]
-  mov rax,[allocated_memory]
-  mov rdx,[rax+rcx]
-  mov qword [rax+OFFSET_END_ADDRESS],rdx
-
-  mov rdi,rdx
-  ;call print_hex
-
   continue:
 
   ;image load
-  mov r11,[EFI_SYSTEM_TABLE]
-  mov r12,[r11 + EFI_BOOT_SERVICES]
+  mov r12,[boot_services]
 
   mov rcx,0;false
   mov rdx, [EFI_BOOT_LOADER_HANDLE] 
@@ -229,13 +208,13 @@ read_continue:
 
   mov r9,[allocated_memory]
 
-
   sub rsp,8*6
-  mov rax, KernelImageHandle
-  mov qword [rsp + 8*5], rax
+
+  mov qword [rsp + 8*5], KernelImageHandle
   mov rax, [KernelFileSize]
   mov qword [rsp + 8*4], rax
   call qword [r12+EFI_IMAGE_LOAD]
+
   add rsp,8*6
 
   cmp rax, EFI_SUCCESS
@@ -245,15 +224,16 @@ read_continue:
   call print
 
   ;start image
-  mov r11,[EFI_SYSTEM_TABLE]
-  mov r12,[r11 + EFI_BOOT_SERVICES]
+  mov r12,[boot_services]
 
   mov rcx, [KernelImageHandle]
   mov rdx,0
   mov r8,0
+
   sub rsp,32
   call qword [r12 + EFI_IMAGE_START]
   add rsp,32
+
   cmp rax,EFI_SUCCESS
   jne error
 
