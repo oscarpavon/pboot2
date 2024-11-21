@@ -1,4 +1,7 @@
 
+boot_services dq ?
+open_protocol dq ?
+
 hex_table db '0123456789abcdef'
 decimal_buffer du '000000000',13,10,0
 hex_buffer db 'FFFFFFFFFFFFFFFF'

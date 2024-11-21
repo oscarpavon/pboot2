@@ -2,16 +2,12 @@ format pe64 efi
 include "efi_constants.inc"
 
 
-;[rsp+8*0] ; shadow space for parm one (volitile)
-;[rsp+8*1] ; shadow space for parm two (volitile)
-;[rsp+8*2] ; shadow space for parm three (volitile)
-;[rsp+8*3] ; shadow space for parm four (volitile)
+;Calling convertion parameters rcx, rdx, r8, r9 
 ;[rsp+8*4] ; param five must be stored here
 ;[rsp+8*5] ; param six must be stored here
-;;Calling convertion parameters rcx, rdx, r8, r9 
-;;return value are in rax
-;;need 32 bytes of shadow space
-;; shadow space is dedicated memory for saving four registers, precisely: rcx, rdx, r8 and r9
+;return value are in rax
+;need 32 bytes of shadow space
+;shadow space is dedicated memory for saving four registers, precisely: rcx, rdx, r8 and r9
 
 section '.text' code executable readable
 
@@ -22,27 +18,27 @@ entry $
   mov [EFI_SYSTEM_TABLE], rdx
   mov [EFI_BOOT_LOADER_HANDLE], rcx
 
+  
+  mov r14,[EFI_SYSTEM_TABLE]
+  mov r13,[r14 + EFI_BOOT_SERVICES]
+  mov [boot_services],r13
+
+  mov r14,[boot_services]
+  mov r13,[r14+EFI_OPEN_PROTOCOL]
+  mov [open_protocol],r13
 
 
   ;get loader image
-  mov r11,[EFI_SYSTEM_TABLE]
-  mov r12,[r11 + EFI_BOOT_SERVICES]
- ; mov r13, [r12 + EFI_OPEN_PROTOCOL]
-
   mov rcx, [EFI_BOOT_LOADER_HANDLE]
   mov rdx, EFI_LOADED_IMAGE_PROTOCOL_GUID
   mov r8, BootLoaderImage
   mov r9, [EFI_BOOT_LOADER_HANDLE]
 
-
   sub rsp,8*6
 
-  mov rax, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL
-  mov qword [rsp+8*5],rax
-  mov rax, 0
-  mov qword [rsp+8*4],rax
-
-  call qword [r12+EFI_OPEN_PROTOCOL]
+  mov qword [rsp+8*5],EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL
+  mov qword [rsp+8*4],0
+  call [open_protocol]
 
   add rsp,8*6
 
