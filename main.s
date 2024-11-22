@@ -69,7 +69,6 @@ entry $
 
   ;open file 
   sub rsp, 8*6
-  mov rax, [RootDirectory]
   mov rcx, [RootDirectory] 
   mov rdx, KernelFile
   mov r8, kernel_name
@@ -77,7 +76,7 @@ entry $
   mov r13, EFI_FILE_READ_ONLY
   mov qword [rsp+8*4], r13
 
-  call qword [rax+OPEN]
+  call qword [rcx+OPEN]
   add rsp, 8*6
    
   cmp rax, EFI_SUCCESS
@@ -88,10 +87,9 @@ entry $
  
   ;get file size
   sub rsp, 8*4
-  mov rax, [KernelFile]
   mov rcx, [KernelFile] 
   mov rdx, MAX_FILE_POSITION
-  call qword [rax+SET_POSITION]
+  call qword [rcx+SET_POSITION]
   add rsp, 8*4
 
   cmp rax, EFI_SUCCESS
@@ -102,7 +100,6 @@ entry $
 
 
   sub rsp, 8*4
-  mov rax, [KernelFile]
   mov rcx, [KernelFile] 
   mov rdx, KernelFileSize
   call qword [rcx+GET_POSITION]
