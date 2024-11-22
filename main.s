@@ -1,5 +1,7 @@
 format pe64 efi
 
+include "config.inc"
+
 include "const.inc"
 
 ;Calling convertion parameters rcx, rdx, r8, r9 
@@ -304,6 +306,10 @@ load_error:
 print:
   push rbx
 
+  mov rax,DEBUG
+  cmp rax,0
+  je .not_print
+
   mov r15,[EFI_SYSTEM_TABLE]
   mov rcx,[r15 + EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL];rcx need to be Simple Text Output
 
@@ -311,6 +317,7 @@ print:
   call qword [rcx + EFI_TEXT_STRING]
   add rsp,32
 
+.not_print:
   pop rbx
 
   ret
