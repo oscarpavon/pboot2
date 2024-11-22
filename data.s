@@ -18,8 +18,6 @@ open_protocol dq ?
 
 allocated_memory dq 0
 
-kernel_name du 'vmlinuz',0
-
 ;messages
 memory_allocated_msg du 'Allocated pool',13,10,0
 open_protocol_ok du 'Open protocol OK',13,10,0
