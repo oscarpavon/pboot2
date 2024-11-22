@@ -150,18 +150,25 @@ entry $
 
   mov r14,0 
   read_kernel:
-  mov rcx,[KernelFile]
+  mov rcx,[KernelFile];first parameter
+
   mov r13,[KernelFileSize]
   sub r13,r14
   mov [readed],r13;total to read
-  mov rdx,readed
+
+  mov rdx,readed;second parameter
+
   mov r15,[allocated_memory]
-  lea r8, [r15+r14]
+  lea r8, [r15+r14];third parameter
+
   sub rsp,4*8
   call qword [rcx+READ]
   add rsp,4*8
+
   cmp rax,EFI_SUCCESS
   jne error
+  
+  ;compare read with file size
   mov rax, [readed]
   mov rdx, [KernelFileSize]
   cmp rax,rdx
