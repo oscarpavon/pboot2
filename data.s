@@ -18,6 +18,8 @@ boot_services dq ?
 open_protocol dq ?
 
 allocated_memory dq 0
+arguments_memory dq 0
+arguments_char_count dd 0
 
 ;messages
 memory_allocated_msg du 'Allocated pool',13,10,0

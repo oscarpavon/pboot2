@@ -2,4 +2,4 @@ DEBUG = 1
 
 kernel_name du 'vmlinuz',0
 
-arguments du "1234",0
+arguments du "root=/dev/sda1 rw fstype=fat",0

@@ -251,19 +251,64 @@ read_continue:
   mov rdx,got_loaded_kernel_image
   call print
 
-  mov r15,[KernelLoadedImage]
-  mov dword [r15+ARGUMENTS_SIZE], 10
-  mov qword [r15+ARGUMENTS], 0x34fffc
 
+  ;get arguments unicode char count
   lea rbx,[arguments]
   call string_len
 
+  mov [arguments_char_count],eax
 
-  call print_decimal
+  ;allocate memory for arguments
 
+  mov r12,[boot_services]
 
+  sub rsp,8*4
 
-  jmp $
+  mov rcx,EFI_MEMORY_LOADER_DATA
+  mov edx, [arguments_char_count]
+  mov r8, arguments_memory
+  call qword [r12+EFI_ALLOCATE_POOL]
+
+  add rsp,8*4
+
+  cmp rax, EFI_SUCCESS
+  jne error
+
+  mov rdx,memory_allocated_msg
+  call print
+
+  mov rcx,0
+  copy_char:
+  mov rax, [arguments_memory]
+  lea rax,[rax+rcx]
+  lea rbx,[arguments]
+  lea rbx,[rbx+rcx]
+
+  mov word dx,[rbx]
+
+  mov word [rax], dx
+  add rcx,2
+  cmp ecx,[arguments_char_count]
+  jl copy_char
+
+  ;put end zero
+  add rax,2
+  mov word [rax],0
+
+  ;print arguments
+  mov rdx,[arguments_memory]
+  call print
+  mov rdx,13
+  call print
+  mov rdx,10
+  call print
+
+  mov r15,[KernelLoadedImage]
+  mov eax,[arguments_char_count]
+  mov dword [r15+ARGUMENTS_SIZE], eax
+  mov rax,[arguments_memory]
+  mov qword [r15+ARGUMENTS], rax
+  
 
   ;start image
   mov r12,[boot_services]
