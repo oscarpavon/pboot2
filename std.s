@@ -58,3 +58,17 @@ print_hex:
 	call print
 
 	ret
+
+;rbx string
+string_len:
+	mov rcx,0
+	count_char:
+	inc rcx
+	add rbx,2
+	mov word ax,[rbx]
+	cmp ax,0
+	jne count_char 
+	
+	mov rax,rcx
+	ret
+

@@ -255,6 +255,13 @@ read_continue:
   mov dword [r15+ARGUMENTS_SIZE], 10
   mov qword [r15+ARGUMENTS], 0x34fffc
 
+  lea rbx,[arguments]
+  call string_len
+
+
+  call print_decimal
+
+
 
   jmp $
 
@@ -416,6 +423,9 @@ get_handles:
 
   pop rbp
   ret
+
+include "std.s"
+
 
 include "data.s"
 

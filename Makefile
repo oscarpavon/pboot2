@@ -1,6 +1,6 @@
 virtual_machine_path := /root/virtual_machine/disk/EFI/BOOT
 
-BOOTX64.EFI: main.s config.inc data.s
+BOOTX64.EFI: main.s config.inc data.s std.s const.inc
 	fasm main.s BOOTX64.EFI
 
 clean:
