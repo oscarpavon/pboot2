@@ -1,6 +1,6 @@
 format pe64 efi
-include "efi_constants.inc"
 
+include "const.inc"
 
 ;Calling convertion parameters rcx, rdx, r8, r9 
 ;[rsp+8*4] ; param five must be stored here
@@ -381,16 +381,7 @@ get_handles:
   pop rbp
   ret
 
-
-
-include "std.s"
-
 include "data.s"
 
-handles_size dq 0
-handles dq ?
-FileSystemDevicePath dq ?
-
-buffer_too_small_msg du 'Buffer too small',13,10,0
 
 
