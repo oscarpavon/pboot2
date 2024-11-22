@@ -229,6 +229,35 @@ read_continue:
   mov rdx,image_loaded
   call print
 
+  
+  ;get loaded kernel image
+
+  mov rcx, [KernelImageHandle]
+  mov rdx, EFI_LOADED_IMAGE_PROTOCOL_GUID
+  mov r8, KernelLoadedImage
+  mov r9, [KernelImageHandle]
+
+  sub rsp,8*6
+
+  mov qword [rsp+8*5],EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL
+  mov qword [rsp+8*4],0
+  call [open_protocol]
+
+  add rsp,8*6
+
+  cmp rax, EFI_SUCCESS
+  jne error
+
+  mov rdx,got_loaded_kernel_image
+  call print
+
+  mov r15,[KernelLoadedImage]
+  mov dword [r15+ARGUMENTS_SIZE], 10
+  mov qword [r15+ARGUMENTS], 0x34fffc
+
+
+  jmp $
+
   ;start image
   mov r12,[boot_services]
 

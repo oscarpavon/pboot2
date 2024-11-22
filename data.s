@@ -5,11 +5,12 @@ FileSystemDevicePath dq ?
 
 
 BootLoaderImage dq ?
-KernelImageHandle dq ?
 FileSystemProtocol dq ?
 RootDirectory dq ?
 KernelFile dq ?
 KernelFileSize dq ?
+KernelLoadedImage dq ?
+KernelImageHandle dq ?
 DevicePathProtocol rq 1
 readed rq 1
 
@@ -29,6 +30,8 @@ image_loaded du "Image loaded",13,10,0
 setted_max_file du "Setted max file",13,10,0
 file_opened du "File opened",13,10,0
 got_device_path du "Got device path",13,10,0
+
+got_loaded_kernel_image du "Got loaded kernel image",13,10,0
 
 buffer_too_small_msg du 'Buffer too small',13,10,0
 
