@@ -333,9 +333,8 @@ read_continue:
   mov rdx,all_ok_msg
   call print
 
-menu:
-  mov rdx,kernel_name
-  call print_in_menu
+
+include "menu.s" 
 
 main_loop:
 
