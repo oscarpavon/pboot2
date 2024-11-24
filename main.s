@@ -335,7 +335,7 @@ read_continue:
 
 menu:
   mov rdx,kernel_name
-  call print
+  call print_in_menu
 
 main_loop:
 
@@ -390,7 +390,21 @@ load_error:
   mov rdx, load_error_msg
   call print
   jmp main_loop
+
+;rdx string
+print_in_menu:
+  push rbx
   
+  mov r15,[EFI_SYSTEM_TABLE]
+  mov rcx,[r15 + EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL];rcx need to be Simple Text Output
+
+  sub rsp,32
+  call qword [rcx + EFI_TEXT_STRING]
+  add rsp,32
+
+  pop rbx
+  ret
+
 ;rdx string
 print:
   push rbx
