@@ -30,6 +30,11 @@ entry $
   mov [open_protocol],r13
 
 
+  mov al,[show_menu]
+  cmp al,1
+  je menu
+  
+
   ;get loader image
   mov rcx, [EFI_BOOT_LOADER_HANDLE]
   mov rdx, EFI_LOADED_IMAGE_PROTOCOL_GUID
@@ -328,10 +333,13 @@ read_continue:
   mov rdx,all_ok_msg
   call print
 
-  
+menu:
+  mov rdx,kernel_name
+  call print
+
 main_loop:
 
-  jmp $
+  jmp main_loop
 
 
 
