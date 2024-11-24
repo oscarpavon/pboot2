@@ -1,4 +1,4 @@
-include "efierror.inc"
+include "efierror.s"
 EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL = 64
 EFI_TEXT_STRING = 8
 

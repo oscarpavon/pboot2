@@ -1,8 +1,8 @@
 format pe64 efi
 
-include "config.inc"
+include "config.s"
 
-include "const.inc"
+include "const.s"
 
 ;Calling convertion parameters rcx, rdx, r8, r9 
 ;[rsp+8*4] ; param five must be stored here
