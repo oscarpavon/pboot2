@@ -37,6 +37,10 @@ entry $
   mov rdx, open_protocol_configured
   call print
 
+  mov rdx,64
+  mov r8,kernel_name_memory
+  call allocate_memory
+
   mov al,[show_menu]
   cmp al,1
   je menu
@@ -87,12 +91,12 @@ boot:
   call print
   
   mov rbx,[kernel_name]
-  lea r14,[kernel_name_buffer]
+  mov r14,[kernel_name_memory]
   call copy_memory
 
-  mov rdx,kernel_name_buffer
+  mov rdx,[kernel_name_memory]
   call print
-  mov rdx,kernel_name_buffer
+  mov rdx,[kernel_name_memory]
   call print
 
   mov rdx,all_ok_msg
@@ -104,7 +108,7 @@ boot:
   mov r12, [RootDirectory] 
   mov rcx, [RootDirectory] 
   mov rdx, KernelFile
-  mov r8, kernel_test
+  mov r8, [kernel_name_memory]
   mov r9, EFI_FILE_MODE_READ
   mov qword [rsp+8*4], EFI_FILE_READ_ONLY
 

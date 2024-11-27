@@ -7,6 +7,8 @@ kernel_parameters_test du 'root=/dev/sda1 rw fstype=fat',0
 kernel_name_buffer rw 32
 kernel_parameters_buffer rw 128
 
+kernel_name_memory dq ?
+
 ;menu
 new_line du 13,10,0
 selected_entry_sign du '*',0
