@@ -1,6 +1,9 @@
 kernel_name dq ?
 kernel_arguments dq ?
 
+kernel_test du 'vmlinuz',0
+kernel_parameters_test du 'root=/dev/sda1 rw fstype=fat',0
+
 kernel_name_buffer rw 32
 kernel_parameters_buffer rw 128
 

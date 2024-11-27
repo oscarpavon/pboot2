@@ -19,7 +19,7 @@ input_loop:
 
 right_pressed:
   call clear
-  call boot
+  jmp boot
 
 left_pressed:
   jmp input_loop

@@ -23,6 +23,12 @@ entries du 0;start entries
   name "VM",0
   kernel "vmlinuz",0
   arguments "root=/dev/sda1 rw fstype=fat",0
+  name "My entry",0
+  kernel "vmlinuz",0
+  arguments "root=/dev/sda1 rw fstype=fat",0
+  name "My true real entry",0
+  kernel "pavonlinuz",0
+  arguments "quiet root=/dev/nvme0n1p3 rw fstype=ext4 init=/sbin/pinit",0
 db 0xFF;end entries
 
 

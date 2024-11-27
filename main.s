@@ -44,9 +44,8 @@ entry $
   call clear
   call print_menu ;call print menu to parse kernel name and arguments
   call clear
-
+  
 boot:
-  push rbp
 
   ;get loader image
   mov rcx, [EFI_BOOT_LOADER_HANDLE]
@@ -87,9 +86,6 @@ boot:
   mov rdx,volume_opened
   call print
   
-  ;open file 
-  sub rsp, 128
-
   mov rbx,[kernel_name]
   lea r14,[kernel_name_buffer]
   call copy_memory
@@ -102,15 +98,18 @@ boot:
   mov rdx,all_ok_msg
   call print
 
+  ;open file 
+  sub rsp, 6*8
+
+  mov r12, [RootDirectory] 
   mov rcx, [RootDirectory] 
   mov rdx, KernelFile
-  mov r8, kernel_name_buffer
+  mov r8, kernel_test
   mov r9, EFI_FILE_MODE_READ
-  mov r13, EFI_FILE_READ_ONLY
-  mov qword [rsp+8*4], r13
+  mov qword [rsp+8*4], EFI_FILE_READ_ONLY
 
-  call qword [rcx+OPEN]
-  add rsp, 128
+  call qword [r12+OPEN]
+  add rsp, 6*8
    
   cmp rax, EFI_SUCCESS
   jne error_open_file
@@ -145,23 +144,10 @@ boot:
   call print
 
   ;allocate memory for kernel file
- 
-  mov r12,[boot_services]
-
-  sub rsp,8*4
-
-  mov rcx,EFI_MEMORY_LOADER_DATA
-  mov rdx, [KernelFileSize]
+  
+  mov rdx,[KernelFileSize]
   mov r8, allocated_memory
-  call qword [r12+EFI_ALLOCATE_POOL]
-
-  add rsp,8*4
-
-  cmp rax, EFI_SUCCESS
-  jne error
-
-  mov rdx,memory_allocated_msg
-  call print
+  call allocate_memory
 
   ;load kernel to memory
 
@@ -290,55 +276,26 @@ read_continue:
 
 
   ;get arguments unicode char count
-  mov rbx,[kernel_arguments]
+  mov rbx,kernel_parameters_test
   call string_len
 
   mov [arguments_char_count],eax
 
   ;allocate memory for arguments
-
-  mov r12,[boot_services]
-
-  sub rsp,8*4
-
-  mov rcx,EFI_MEMORY_LOADER_DATA
   mov edx, [arguments_char_count]
   mov r8, arguments_memory
-  call qword [r12+EFI_ALLOCATE_POOL]
-
-  add rsp,8*4
-
-  cmp rax, EFI_SUCCESS
-  jne error
-
-  mov rdx,memory_allocated_msg
-  call print
-
+  call allocate_memory
   
   ;kernel arguments
-  mov rbx,[kernel_arguments]
-  lea r14,[kernel_parameters_buffer]
+  ;mov rbx,[kernel_arguments]
+  ;lea r14,[kernel_parameters_buffer]
+  ;call copy_memory
+
+
+  
+  mov rbx,kernel_parameters_test
+  mov r14,[arguments_memory]
   call copy_memory
-
-
-
-  mov rcx,0
-  copy_char:
-  mov rax, [arguments_memory]
-  lea rax,[rax+rcx]
-  lea rbx,[kernel_parameters_buffer]
-  lea rbx,[rbx+rcx]
-
-  mov word dx,[rbx]
-
-  mov word [rax], dx
-  add rcx,2
-  cmp ecx,[arguments_char_count]
-  jl copy_char
-
-  ;put end zero
-  add rax,2
-  mov word [rax],0
 
   mov r15,[KernelLoadedImage]
   mov eax,[arguments_char_count]
@@ -349,7 +306,6 @@ read_continue:
   mov rdx,kernel_arguments_configured
   call print
 
-  jmp $
 
   ;start image
   mov r12,[boot_services]
@@ -441,6 +397,30 @@ get_handles:
 
   pop rbp
   ret
+
+;rdx count
+;r8 out_memory
+allocate_memory:
+  push rbp
+
+  mov r12,[boot_services]
+
+  sub rsp,8*4
+
+  mov rcx,EFI_MEMORY_LOADER_DATA
+  call qword [r12+EFI_ALLOCATE_POOL]
+
+  add rsp,8*4
+
+  cmp rax, EFI_SUCCESS
+  jne error
+
+  mov rdx,memory_allocated_msg
+  call print
+
+  pop rbp
+  ret
+
 
 include "std.s"
 
