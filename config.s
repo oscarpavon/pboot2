@@ -6,7 +6,7 @@ arguments equ du
 ;use to configure the bootloader
 DEBUG = 1
 
-show_menu db 1
+show_menu db 0
 
 boot_entry db 1;start from 1
 

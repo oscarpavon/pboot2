@@ -89,6 +89,7 @@ copy_memory:
 	
 
 end_copy:
+	mov word [r14],0
 	add r14,2
 	mov word [r14],0
 	mov word [r14+2],0

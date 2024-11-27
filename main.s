@@ -90,48 +90,24 @@ boot:
   mov rdx,volume_opened
   call print
   
-  mov rbx,[kernel_name]
+  mov rbx,kernel_test
   mov r14,[kernel_name_memory]
-  call copy_memory
-
-  mov rdx,[kernel_name_memory]
-  call print
-  mov rdx,[kernel_name_memory]
-  call print
-
-  mov rdx,all_ok_msg
-  call print
+  ;call copy_memory
 
   ;open file 
   mov rdx, KernelFile
-  mov r8, [kernel_name_memory]
+  ;mov r8, [kernel_name_memory]
+  mov r8, kernel_test
   call open_file
- 
+
+  mov rdx,all_ok_msg
+  call print
+  
   ;get file size
-  sub rsp, 8*4
-  mov rcx, [KernelFile] 
-  mov rdx, MAX_FILE_POSITION
-  call qword [rcx+SET_POSITION]
-  add rsp, 8*4
-
-  cmp rax, EFI_SUCCESS
-  jne error
-
-  mov rdx,setted_max_file
-  call print
-
-
-  sub rsp, 8*4
-  mov rcx, [KernelFile] 
+  mov rcx,[KernelFile]
   mov rdx, KernelFileSize
-  call qword [rcx+GET_POSITION]
-  add rsp, 8*4
+  call get_file_size
 
-  cmp rax, EFI_SUCCESS
-  jne error
-
-  mov rdx,got_file_size
-  call print
 
   ;allocate memory for kernel file
   
@@ -411,31 +387,7 @@ allocate_memory:
   pop rbp
   ret
 
-;rdx out File
-;r8 name
-open_file: 
-  push rbp
-
-  sub rsp, 6*8
-
-  mov r12, [RootDirectory] 
-  mov rcx, [RootDirectory] 
-  mov r9, EFI_FILE_MODE_READ
-  mov qword [rsp+8*4], EFI_FILE_READ_ONLY
-
-  call qword [r12+OPEN]
-  add rsp, 6*8
-   
-  cmp rax, EFI_SUCCESS
-  jne error_open_file
-
-  mov rdx,file_opened
-  call print
-
-  pop rbp
-
-  ret
-
+include "file.s"
 include "std.s"
 
 include "console.s"
