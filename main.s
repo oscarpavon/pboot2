@@ -47,7 +47,6 @@ boot:
   mov rdx,new_line
   call print
 
-  jmp $
 
 
   ;get loader image
@@ -273,7 +272,7 @@ read_continue:
 
 
   ;get arguments unicode char count
-  lea rbx,[arguments]
+  mov rbx,[arguments]
   call string_len
 
   mov [arguments_char_count],eax
@@ -301,7 +300,7 @@ read_continue:
   copy_char:
   mov rax, [arguments_memory]
   lea rax,[rax+rcx]
-  lea rbx,[arguments]
+  mov rbx,[arguments]
   lea rbx,[rbx+rcx]
 
   mov word dx,[rbx]
