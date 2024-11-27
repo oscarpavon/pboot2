@@ -48,7 +48,6 @@ boot:
   call print
 
 
-
   ;get loader image
   mov rcx, [EFI_BOOT_LOADER_HANDLE]
   mov rdx, EFI_LOADED_IMAGE_PROTOCOL_GUID

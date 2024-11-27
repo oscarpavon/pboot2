@@ -34,7 +34,7 @@ find_entry:
   lea rdx,[r14+rcx]
   cmp word [rdx],0
   jne find_one_entry
-  je check_if_entry_name
+  je check_entry
 
 end_entries:
   mov rdx,msg
@@ -45,7 +45,7 @@ end_entries:
   ret
   
 
-check_if_entry_name:
+check_entry:
   mov r11,rsi
   add r11,2;plus end zero
   lea r13,[r14+r11]
@@ -61,21 +61,30 @@ check_if_entry_name:
 
   jmp find_entry
 
-set_kernel_name:
+;rax value to set
+;rdx value
+can_set_value:
+  cmp dil, [boot_entry]
+  je set_value 
+  ret
+set_value:
   mov r11,rsi
   add r11,2;plus end zero
   lea rdx,[r14+r11]
-  mov [kernel_name],rdx
+  mov [rax],rdx
+  ret
+
+set_kernel_name:
+  mov rax,kernel_name
+  call can_set_value
+
   inc r12
-     
   jmp find_entry
 
 set_arguments:
   xor r12,r12;reset entry menu name counter
-  mov r11,rsi
-  add r11,2;plus end zero
-  lea rdx,[r14+r11]
-  mov [arguments],rdx
+  mov rax, arguments
+  call can_set_value
   jmp find_entry
   
 

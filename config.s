@@ -12,10 +12,10 @@ entries du 0;start entries
   kernel "vmlinuz",0
   du "root=/dev/sda1 rw fstype=fat",0
   name "Pavon Linux",0
-  kernel "vmlinuz",0
+  kernel "vmlinuz2",0
   du "root=/dev/sda1 rw fstype=fat",0
   name "Gentoo Linux",0
-  kernel "vmlinuz",0
+  kernel "vmlinuz3",0
   du "root=/dev/sda1 rw fstype=fat",0
 db 0xFF;end entries
 
