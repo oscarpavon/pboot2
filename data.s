@@ -1,6 +1,13 @@
 kernel_name dq ?
 kernel_arguments dq ?
 
+;menu
+new_line du 13,10,0
+selected_entry_sign du '*',0
+
+entries_count db 0
+
+;input
 input_key du 0
           du 0
 
@@ -26,7 +33,15 @@ allocated_memory dq 0
 arguments_memory dq 0
 arguments_char_count dd 0
 
+;menu debug
+parsed_entry du "parsed entry2",13,10,0
+
+
 ;messages
+welcome du "pboot2",13,10,0
+boot_services_configured du "Boot services configured",13,10,0
+open_protocol_configured du "Open protocol configured",13,10,0
+menu_configured du "Menu configured",13,10,0
 memory_allocated_msg du 'Allocated pool',13,10,0
 open_protocol_ok du 'Open protocol OK',13,10,0
 got_loaded_image du "Got loaded image",13,10,0

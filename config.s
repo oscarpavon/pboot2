@@ -4,11 +4,11 @@ kernel equ du
 arguments equ du
 
 ;use to configure the bootloader
-DEBUG = 0
+DEBUG = 1
 
-show_menu db 0
+show_menu db 1
 
-boot_entry db 4;start from 1
+boot_entry db 1;start from 1
 
 entries du 0;start entries
   name "Pavon Linux",0

@@ -22,8 +22,6 @@ right_pressed:
   jmp boot
 
 left_pressed:
-  mov rdx,left_pressed_msg
-  call print
   jmp input_loop
 
 up_pressed:
@@ -70,4 +68,3 @@ get_key:
   pop rbp
   ret
 
-left_pressed_msg du "left pressed",13,10,0

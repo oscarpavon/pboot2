@@ -19,16 +19,23 @@ entry $
   
   mov [EFI_SYSTEM_TABLE], rdx
   mov [EFI_BOOT_LOADER_HANDLE], rcx
-
   
+  mov rdx,welcome
+  call print
+
   mov r14,[EFI_SYSTEM_TABLE]
   mov r13,[r14 + EFI_BOOT_SERVICES]
   mov [boot_services],r13
+
+  mov rdx,boot_services_configured
+  call print
 
   mov r14,[boot_services]
   mov r13,[r14+EFI_OPEN_PROTOCOL]
   mov [open_protocol],r13
 
+  mov rdx, open_protocol_configured
+  call print
 
   mov al,[show_menu]
   cmp al,1
@@ -39,16 +46,6 @@ entry $
   call clear
 
 boot:
-
-  ;print entry data
-  mov rdx,[kernel_name]
-  call print
-  mov rdx,new_line
-  call print
-  mov rdx,[kernel_arguments]
-  call print
-  mov rdx,new_line
-  call print
 
 
   ;get loader image
@@ -89,18 +86,31 @@ boot:
   
   mov rdx,volume_opened
   call print
-
+  
   ;open file 
-  sub rsp, 8*6
+  sub rsp, 128
+
+  mov rbx,[kernel_name]
+  mov r14,[rsp+8*5]
+  call copy_to_stack
+
+  mov rdx,[rsp+8*5]
+  call print
+  mov rdx,[rsp+8*5]
+  call print
+
+  mov rdx,all_ok_msg
+  call print
+
   mov rcx, [RootDirectory] 
   mov rdx, KernelFile
-  mov r8, [kernel_name]
+  mov r8, [rsp+8*5]
   mov r9, EFI_FILE_MODE_READ
   mov r13, EFI_FILE_READ_ONLY
   mov qword [rsp+8*4], r13
 
   call qword [rcx+OPEN]
-  add rsp, 8*6
+  add rsp, 128
    
   cmp rax, EFI_SUCCESS
   jne error_open_file
@@ -476,6 +486,7 @@ include "std.s"
 
 include "console.s"
 
+section '.data' data readable writeable
 include "data.s"
 
 

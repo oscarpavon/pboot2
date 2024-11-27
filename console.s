@@ -1,7 +1,7 @@
 
 ;rdx string
 print_in_menu:
-  push rbx
+  push rcx
   
   mov r15,[EFI_SYSTEM_TABLE]
   mov rcx,[r15 + EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL];rcx need to be Simple Text Output
@@ -10,12 +10,12 @@ print_in_menu:
   call qword [rcx + EFI_TEXT_STRING]
   add rsp,32
 
-  pop rbx
+  pop rcx
   ret
 
 ;rdx string
 print:
-  push rbx
+  push rbp
 
   mov rax,DEBUG
   cmp rax,0
@@ -29,7 +29,7 @@ print:
   add rsp,32
 
 .not_print:
-  pop rbx
+  pop rbp
 
   ret
 
@@ -47,3 +47,11 @@ clear:
   pop rbp
 
   ret
+
+print_menu_debug:
+  push rcx
+  mov rdx,parsed_entry
+  call print
+  pop rcx
+  ret
+

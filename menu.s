@@ -1,7 +1,3 @@
-new_line du 13,10,0
-selected_entry_sign du '*',0
-
-entries_count db 0
 
 include "input.s"
 
@@ -17,7 +13,7 @@ menu:
 print_menu:
 mov byte [entries_count],0
 push rbp
-lea r14,[entries]
+lea r10,[entries]
 xor rcx,rcx ;global char counter
 xor rdi,rdi ;entry number
 xor rsi,rsi ;menu char counter
@@ -26,8 +22,9 @@ find_entry:
   mov rsi,rcx
   find_one_entry:
   add rcx,2
-  lea rdx,[r14+rcx]
-  cmp word [rdx],0
+  lea r10,[entries]
+  lea r9,[r10+rcx]
+  cmp word [r9],0
   jne find_one_entry
   je check_entry
 
@@ -41,7 +38,8 @@ end_entries:
 check_entry:
   mov r11,rsi
   add r11,2;plus end zero
-  lea r13,[r14+r11]
+  lea r10,[entries]
+  lea r13,[r10+r11]
   cmp byte [r13],0xFF;end entries const
   je end_entries
   cmp r12,0
@@ -50,8 +48,8 @@ check_entry:
   je set_kernel_name
   cmp r12,2
   je set_arguments
-  inc r12
-
+  
+  ;not here
   jmp find_entry
 
 ;rax value to set
@@ -62,9 +60,10 @@ can_set_value:
   ret
 set_value:
   mov r11,rsi
-  add r11,2;plus end zero
-  lea rdx,[r14+r11]
-  mov [rax],rdx
+  add r11,4;plus end zero
+  lea r10,[entries]
+  lea rbx,[r10+r11]
+  mov [rax],rbx
   ret
 
 set_kernel_name:
@@ -78,6 +77,7 @@ set_arguments:
   xor r12,r12;reset entry menu name counter
   mov rax, kernel_arguments
   call can_set_value
+
   jmp find_entry
   
 
@@ -89,15 +89,14 @@ print_entry:
   inc dil;selected entry counter
   mov r11,rsi
   add r11,2;plus end zero
-  push rcx;print override rcx
-  lea rdx,[r14+r11]
+  lea r10,[entries]
+  lea rdx,[r10+r11]
   call print_in_menu
   cmp dil, [boot_entry]
   je print_selected_entry_sign
 continue_print_entry:
   mov rdx,new_line
   call print_in_menu
-  pop rcx
   jmp find_entry
 
 print_selected_entry_sign:

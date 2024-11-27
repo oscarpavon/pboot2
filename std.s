@@ -72,3 +72,24 @@ string_len:
 	mov rax,rcx
 	ret
 
+;rbx string
+copy_to_stack:
+	.char:
+	mov word ax,[rbx]
+	cmp ax,13
+	je end_copy
+	cmp ax,10
+	je end_copy
+	mov word [r14],ax
+	add rbx,2
+	add r14,2
+	cmp ax,0
+	jne .char
+	
+
+end_copy:
+	add r14,2
+	mov word [r14],0
+	mov word [r14+2],0
+
+	ret
