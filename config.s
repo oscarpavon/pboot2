@@ -5,7 +5,7 @@ kernel equ du
 
 show_menu db 1
 
-boot_entry db 3;start from 1
+boot_entry db 1;start from 1
 
 entries du 0;start entries
   name "VM Linux",0

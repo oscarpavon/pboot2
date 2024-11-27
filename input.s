@@ -6,7 +6,11 @@ input_loop:
   mov ax,[input_key]
   cmp rax,KEY_CODE_LEFT
   je left_pressed
+  cmp rax,KEY_CODE_DOWN
+  je down_pressed
 
+  mov rdx,left_pressed_msg
+  ;call print
 
   jmp input_loop
 
@@ -15,6 +19,16 @@ left_pressed:
   mov rdx,left_pressed_msg
   call print
   jmp input_loop
+
+down_pressed:
+  mov al,[boot_entry]
+  inc al
+  mov [boot_entry],al
+  call clear
+  call print_menu
+  
+  jmp input_loop
+
 
 get_key:
   push rbp

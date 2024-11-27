@@ -1,4 +1,5 @@
 msg du "end entries",13,10,0
+menu_ok du "menu ok",13,10,0
 new_line du 13,10,0
 selected_entry_sign du '*',0
 
@@ -8,17 +9,22 @@ menu:
   
   call clear
 
+  call print_menu
+
+  mov rdx,menu_ok
+  call print
+
   jmp input_loop
 
   
-
+print_menu:
+push rbp
 lea r14,[entries]
 xor rcx,rcx
 xor rdi,rdi ;entry number
-xor rsi,rsi
-xor r12,r12
+xor rsi,rsi ;menu char counter
+xor r12,r12 ;enty name control
 find_entry:
-  push r14
   mov rsi,rcx
   find_one_entry:
   add rcx,2
@@ -30,9 +36,11 @@ find_entry:
 end_entries:
   mov rdx,msg
   call print
-  
 
-  jmp $
+  pop rbp
+
+  ret
+  
 
 check_if_entry_name:
   mov r11,rsi
