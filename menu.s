@@ -1,5 +1,3 @@
-msg du "end entries",13,10,0
-menu_ok du "menu ok",13,10,0
 new_line du 13,10,0
 selected_entry_sign du '*',0
 
@@ -12,9 +10,6 @@ menu:
   call clear
 
   call print_menu
-
-  mov rdx,menu_ok
-  call print
 
   jmp input_loop
 
@@ -37,8 +32,6 @@ find_entry:
   je check_entry
 
 end_entries:
-  mov rdx,msg
-  call print
 
   pop rbp
 

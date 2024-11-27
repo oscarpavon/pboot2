@@ -13,13 +13,12 @@ input_loop:
   cmp rax,KEY_CODE_RIGHT
   je right_pressed
 
-  mov rdx,left_pressed_msg
-  ;call print
 
   jmp input_loop
 
 
 right_pressed:
+  call clear
   jmp boot
 
 left_pressed:
