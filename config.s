@@ -19,8 +19,4 @@ entries du 0;start entries
   du "root=/dev/sda1 rw fstype=fat",0
 db 0xFF;end entries
 
-
-
-kernel_name du 'vmlinuz',0
-
 arguments du "root=/dev/sda1 rw fstype=fat",0

@@ -35,6 +35,7 @@ entry $
   je menu
   
 
+boot:
   ;get loader image
   mov rcx, [EFI_BOOT_LOADER_HANDLE]
   mov rdx, EFI_LOADED_IMAGE_PROTOCOL_GUID
@@ -78,7 +79,7 @@ entry $
   sub rsp, 8*6
   mov rcx, [RootDirectory] 
   mov rdx, KernelFile
-  mov r8, kernel_name
+  mov r8, [kernel_name]
   mov r9, EFI_FILE_MODE_READ
   mov r13, EFI_FILE_READ_ONLY
   mov qword [rsp+8*4], r13

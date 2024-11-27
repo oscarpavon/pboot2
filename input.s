@@ -10,12 +10,17 @@ input_loop:
   je down_pressed
   cmp rax,KEY_CODE_UP
   je up_pressed
+  cmp rax,KEY_CODE_RIGHT
+  je right_pressed
 
   mov rdx,left_pressed_msg
   ;call print
 
   jmp input_loop
 
+
+right_pressed:
+  jmp boot
 
 left_pressed:
   mov rdx,left_pressed_msg

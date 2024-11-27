@@ -53,10 +53,21 @@ check_if_entry_name:
   je end_entries
   cmp r12,0
   je print_entry
+  cmp r12,1
+  je set_kernel_name
   cmp r12,2
   je entry_name_control_set_zero
   inc r12
 
+  jmp find_entry
+
+set_kernel_name:
+  mov r11,rsi
+  add r11,2;plus end zero
+  lea rdx,[r14+r11]
+  mov [kernel_name],rdx
+  inc r12
+     
   jmp find_entry
 
 entry_name_control_set_zero:
