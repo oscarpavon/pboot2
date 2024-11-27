@@ -19,4 +19,3 @@ entries du 0;start entries
   du "root=/dev/sda1 rw fstype=fat",0
 db 0xFF;end entries
 
-arguments du "root=/dev/sda1 rw fstype=fat",0

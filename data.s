@@ -1,4 +1,5 @@
 kernel_name dq ?
+arguments dq ?
 
 input_key du 0
           du 0

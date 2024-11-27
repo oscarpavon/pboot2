@@ -36,6 +36,20 @@ entry $
   
 
 boot:
+
+  ;print entry data
+  mov rdx,[kernel_name]
+  call print
+  mov rdx,new_line
+  call print
+  mov rdx,[arguments]
+  call print
+  mov rdx,new_line
+  call print
+
+  jmp $
+
+
   ;get loader image
   mov rcx, [EFI_BOOT_LOADER_HANDLE]
   mov rdx, EFI_LOADED_IMAGE_PROTOCOL_GUID

@@ -56,7 +56,7 @@ check_if_entry_name:
   cmp r12,1
   je set_kernel_name
   cmp r12,2
-  je entry_name_control_set_zero
+  je set_arguments
   inc r12
 
   jmp find_entry
@@ -70,8 +70,12 @@ set_kernel_name:
      
   jmp find_entry
 
-entry_name_control_set_zero:
-  xor r12,r12
+set_arguments:
+  xor r12,r12;reset entry menu name counter
+  mov r11,rsi
+  add r11,2;plus end zero
+  lea rdx,[r14+r11]
+  mov [arguments],rdx
   jmp find_entry
   
 
