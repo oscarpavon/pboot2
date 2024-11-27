@@ -47,6 +47,7 @@ open_protocol_configured du "Open protocol configured",13,10,0
 menu_configured du "Menu configured",13,10,0
 kernel_file_closed du "Kernel file closed",13,10,0
 root_directoy_closed du "Root directory closed",13,10,0
+kernel_arguments_configured du "Kernel arguments configured",13,10,0
 memory_allocated_msg du 'Allocated pool',13,10,0
 open_protocol_ok du 'Open protocol OK',13,10,0
 got_loaded_image du "Got loaded image",13,10,0
