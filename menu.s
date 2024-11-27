@@ -7,6 +7,7 @@ lea r14,[entries]
 xor rcx,rcx
 xor rdi,rdi ;entry number
 xor rsi,rsi
+xor r12,r12
 find_entry:
   push r14
   mov rsi,rcx
@@ -15,7 +16,7 @@ find_entry:
   lea rdx,[r14+rcx]
   cmp word [rdx],0
   jne find_one_entry
-  je print_entry
+  je check_if_entry_name
 
 end_entries:
   mov rdx,msg
@@ -24,13 +25,30 @@ end_entries:
 
   jmp $
 
-print_entry:
-  inc dil;selected entry counter
+check_if_entry_name:
   mov r11,rsi
   add r11,2;plus end zero
   lea r13,[r14+r11]
   cmp byte [r13],0xFF
   je end_entries
+  cmp r12,0
+  je print_entry
+  cmp r12,2
+  je entry_name_control_set_zero
+  inc r12
+
+  jmp find_entry
+
+entry_name_control_set_zero:
+  xor r12,r12
+  jmp find_entry
+  
+
+print_entry:
+  inc r12;entry name control
+  inc dil;selected entry counter
+  mov r11,rsi
+  add r11,2;plus end zero
   push rcx;print override rcx
   lea rdx,[r14+r11]
   call print_in_menu
