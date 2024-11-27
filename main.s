@@ -34,6 +34,9 @@ entry $
   cmp al,1
   je menu
   
+  call clear
+  call print_menu ;call print menu to parse kernel name and arguments
+  call clear
 
 boot:
 

@@ -4,18 +4,18 @@ kernel equ du
 arguments equ du
 
 ;use to configure the bootloader
-DEBUG = 1
+DEBUG = 0
 
-show_menu db 1
+show_menu db 0
 
-boot_entry db 3;start from 1
+boot_entry db 4;start from 1
 
 entries du 0;start entries
   name "Pavon Linux",0
   kernel "pavonlinuz",0
   arguments "quiet root=/dev/nvme0n1p3 rw fstype=ext4 init=/sbin/pinit",0
   name "Gentoo Linux",0
-  kernel "pavonlinuz",0
+  kernel "vmlinuz",0
   arguments "quiet root=/dev/nvme0n1p2 ro fstype=ext4",0
   name "PKernel",0
   kernel "pkernel",0
