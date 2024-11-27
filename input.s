@@ -21,14 +21,26 @@ left_pressed:
   jmp input_loop
 
 down_pressed:
+  mov dl,[entries_count]
   mov al,[boot_entry]
-  inc al
-  mov [boot_entry],al
-  call clear
-  call print_menu
+  cmp al,dl
+  jl increment_current_entry
   
   jmp input_loop
 
+
+increment_current_entry:
+  inc al
+  mov [boot_entry],al
+  call update_menu
+  jmp input_loop
+
+decrement_current_entry:
+  dec al
+  mov [boot_entry],al
+  call update_menu
+  jmp input_loop
+  
 
 get_key:
   push rbp

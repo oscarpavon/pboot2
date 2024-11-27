@@ -3,6 +3,8 @@ menu_ok du "menu ok",13,10,0
 new_line du 13,10,0
 selected_entry_sign du '*',0
 
+entries_count db 0
+
 include "input.s"
 
 menu:
@@ -18,12 +20,13 @@ menu:
 
   
 print_menu:
+mov byte [entries_count],0
 push rbp
 lea r14,[entries]
-xor rcx,rcx
+xor rcx,rcx ;global char counter
 xor rdi,rdi ;entry number
 xor rsi,rsi ;menu char counter
-xor r12,r12 ;enty name control
+xor r12,r12 ;entry name control
 find_entry:
   mov rsi,rcx
   find_one_entry:
@@ -46,7 +49,7 @@ check_if_entry_name:
   mov r11,rsi
   add r11,2;plus end zero
   lea r13,[r14+r11]
-  cmp byte [r13],0xFF
+  cmp byte [r13],0xFF;end entries const
   je end_entries
   cmp r12,0
   je print_entry
@@ -62,6 +65,9 @@ entry_name_control_set_zero:
   
 
 print_entry:
+  mov al,[entries_count]
+  inc al
+  mov [entries_count],al
   inc r12;entry name control
   inc dil;selected entry counter
   mov r11,rsi
@@ -81,4 +87,12 @@ print_selected_entry_sign:
   mov rdx,selected_entry_sign
   call print_in_menu
   jmp continue_print_entry
+
+
+update_menu:
+  push rbp
+  call clear
+  call print_menu
+  pop rbp
+  ret
 
