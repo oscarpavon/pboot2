@@ -46,7 +46,7 @@ entry $
   call clear
 
 boot:
-
+  push rbp
 
   ;get loader image
   mov rcx, [EFI_BOOT_LOADER_HANDLE]
@@ -91,12 +91,12 @@ boot:
   sub rsp, 128
 
   mov rbx,[kernel_name]
-  mov r14,[rsp+8*5]
-  call copy_to_stack
+  lea r14,[kernel_name_buffer]
+  call copy_memory
 
-  mov rdx,[rsp+8*5]
+  mov rdx,kernel_name_buffer
   call print
-  mov rdx,[rsp+8*5]
+  mov rdx,kernel_name_buffer
   call print
 
   mov rdx,all_ok_msg
@@ -104,7 +104,7 @@ boot:
 
   mov rcx, [RootDirectory] 
   mov rdx, KernelFile
-  mov r8, [rsp+8*5]
+  mov r8, kernel_name_buffer
   mov r9, EFI_FILE_MODE_READ
   mov r13, EFI_FILE_READ_ONLY
   mov qword [rsp+8*4], r13

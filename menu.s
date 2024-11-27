@@ -60,7 +60,7 @@ can_set_value:
   ret
 set_value:
   mov r11,rsi
-  add r11,4;plus end zero
+  add r11,2;plus end zero
   lea r10,[entries]
   lea rbx,[r10+r11]
   mov [rax],rbx

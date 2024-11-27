@@ -1,6 +1,9 @@
 kernel_name dq ?
 kernel_arguments dq ?
 
+kernel_name_buffer rw 32
+kernel_parameters_buffer rw 128
+
 ;menu
 new_line du 13,10,0
 selected_entry_sign du '*',0

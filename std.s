@@ -73,7 +73,8 @@ string_len:
 	ret
 
 ;rbx string
-copy_to_stack:
+;r14 memory
+copy_memory:
 	.char:
 	mov word ax,[rbx]
 	cmp ax,13
