@@ -103,23 +103,9 @@ boot:
   call print
 
   ;open file 
-  sub rsp, 6*8
-
-  mov r12, [RootDirectory] 
-  mov rcx, [RootDirectory] 
   mov rdx, KernelFile
   mov r8, [kernel_name_memory]
-  mov r9, EFI_FILE_MODE_READ
-  mov qword [rsp+8*4], EFI_FILE_READ_ONLY
-
-  call qword [r12+OPEN]
-  add rsp, 6*8
-   
-  cmp rax, EFI_SUCCESS
-  jne error_open_file
-
-  mov rdx,file_opened
-  call print
+  call open_file
  
   ;get file size
   sub rsp, 8*4
@@ -425,6 +411,30 @@ allocate_memory:
   pop rbp
   ret
 
+;rdx out File
+;r8 name
+open_file: 
+  push rbp
+
+  sub rsp, 6*8
+
+  mov r12, [RootDirectory] 
+  mov rcx, [RootDirectory] 
+  mov r9, EFI_FILE_MODE_READ
+  mov qword [rsp+8*4], EFI_FILE_READ_ONLY
+
+  call qword [r12+OPEN]
+  add rsp, 6*8
+   
+  cmp rax, EFI_SUCCESS
+  jne error_open_file
+
+  mov rdx,file_opened
+  call print
+
+  pop rbp
+
+  ret
 
 include "std.s"
 
