@@ -8,6 +8,8 @@ input_loop:
   je left_pressed
   cmp rax,KEY_CODE_DOWN
   je down_pressed
+  cmp rax,KEY_CODE_UP
+  je up_pressed
 
   mov rdx,left_pressed_msg
   ;call print
@@ -18,6 +20,13 @@ input_loop:
 left_pressed:
   mov rdx,left_pressed_msg
   call print
+  jmp input_loop
+
+up_pressed:
+  mov al,[boot_entry]
+  cmp al,1;entries start at 1
+  jg decrement_current_entry
+  
   jmp input_loop
 
 down_pressed:
