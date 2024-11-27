@@ -83,7 +83,7 @@ set_kernel_name:
 
 set_arguments:
   xor r12,r12;reset entry menu name counter
-  mov rax, arguments
+  mov rax, kernel_arguments
   call can_set_value
   jmp find_entry
   

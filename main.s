@@ -42,7 +42,7 @@ boot:
   call print
   mov rdx,new_line
   call print
-  mov rdx,[arguments]
+  mov rdx,[kernel_arguments]
   call print
   mov rdx,new_line
   call print
@@ -271,7 +271,7 @@ read_continue:
 
 
   ;get arguments unicode char count
-  mov rbx,[arguments]
+  mov rbx,[kernel_arguments]
   call string_len
 
   mov [arguments_char_count],eax
@@ -299,7 +299,7 @@ read_continue:
   copy_char:
   mov rax, [arguments_memory]
   lea rax,[rax+rcx]
-  mov rbx,[arguments]
+  mov rbx,[kernel_arguments]
   lea rbx,[rbx+rcx]
 
   mov word dx,[rbx]
