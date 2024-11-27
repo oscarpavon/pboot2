@@ -1,7 +1,16 @@
 msg du "end entries",13,10,0
 new_line du 13,10,0
 selected_entry_sign du '*',0
+
+include "input.s"
+
 menu:
+  
+  call clear
+
+  jmp input_loop
+
+  
 
 lea r14,[entries]
 xor rcx,rcx

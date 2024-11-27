@@ -30,8 +30,6 @@ entry $
   mov [open_protocol],r13
 
 
-  include "input.s"
-
   mov al,[show_menu]
   cmp al,1
   je menu
@@ -392,40 +390,6 @@ load_error:
   call print
   jmp main_loop
 
-;rdx string
-print_in_menu:
-  push rbx
-  
-  mov r15,[EFI_SYSTEM_TABLE]
-  mov rcx,[r15 + EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL];rcx need to be Simple Text Output
-
-  sub rsp,32
-  call qword [rcx + EFI_TEXT_STRING]
-  add rsp,32
-
-  pop rbx
-  ret
-
-;rdx string
-print:
-  push rbx
-
-  mov rax,DEBUG
-  cmp rax,0
-  je .not_print
-
-  mov r15,[EFI_SYSTEM_TABLE]
-  mov rcx,[r15 + EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL];rcx need to be Simple Text Output
-
-  sub rsp,32
-  call qword [rcx + EFI_TEXT_STRING]
-  add rsp,32
-
-.not_print:
-  pop rbx
-
-  ret
-
 
 get_device_path:
   push rbp
@@ -494,6 +458,7 @@ get_handles:
 
 include "std.s"
 
+include "console.s"
 
 include "data.s"
 
