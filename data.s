@@ -1,4 +1,7 @@
 
+input_key du 0
+          du 0
+
 handles_size dq 0
 handles dq ?
 FileSystemDevicePath dq ?

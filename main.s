@@ -30,6 +30,8 @@ entry $
   mov [open_protocol],r13
 
 
+  include "input.s"
+
   mov al,[show_menu]
   cmp al,1
   je menu
