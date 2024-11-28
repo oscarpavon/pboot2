@@ -121,33 +121,13 @@ boot:
   ;jmp read_to_memory
 
   call read_simple
+
+  mov rdx,all_ok_msg
+  call print
  
   continue:
 
-  ;close kernel file after reading
-  add rsp,32
-  mov r15, [KernelFile]
-  mov rcx,[KernelFile]
-  call qword [r15+CLOSE]
-  sub rsp,32
-  cmp rax,EFI_SUCCESS
-  jne error
-
-  mov rdx,kernel_file_closed
-  call print
- 
-  ;close root directory
-  add rsp,32
-  mov r15, [RootDirectory]
-  mov rcx,[RootDirectory]
-  call qword [r15+CLOSE]
-  sub rsp,32
-  cmp rax,EFI_SUCCESS
-  jne error
-
-  mov rdx,root_directoy_closed
-  call print
-  
+  ;call close_file 
 
   ;image load
   mov r12,[boot_services]

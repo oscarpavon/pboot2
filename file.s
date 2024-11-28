@@ -140,3 +140,33 @@ read_continue:
   cmp r14,[KernelFileSize]
   je continue
   jl read_kernel
+
+
+close_file:
+  push rbp
+    ;close kernel file after reading
+  add rsp,32
+  mov r15, [KernelFile]
+  mov rcx,[KernelFile]
+  call qword [r15+CLOSE]
+  sub rsp,32
+  cmp rax,EFI_SUCCESS
+  jne error
+
+  mov rdx,kernel_file_closed
+  call print
+ 
+  ;close root directory
+  add rsp,32
+  mov r15, [RootDirectory]
+  mov rcx,[RootDirectory]
+  call qword [r15+CLOSE]
+  sub rsp,32
+  cmp rax,EFI_SUCCESS
+  jne error
+
+  mov rdx,root_directoy_closed
+  call print
+  
+  pop rbp
+  ret
