@@ -100,13 +100,12 @@ boot:
   mov r8, kernel_test
   call open_file
 
-  mov rdx,all_ok_msg
-  call print
   
   ;get file size
-  mov rcx,[KernelFile]
-  mov rdx, KernelFileSize
-  call get_file_size
+  ;mov rcx,[KernelFile]
+  ;mov rdx, KernelFileSize
+  ;call get_file_size
+  mov [KernelFileSize],16483328
 
 
   ;allocate memory for kernel file
@@ -117,54 +116,11 @@ boot:
 
   ;load kernel to memory
 
-  sub rsp, 8*4
-
-  mov rcx, [KernelFile] 
-  mov rdx, 0;we start from the zero position
-  call qword [rcx+SET_POSITION]
-
-  add rsp, 8*4
-
-  cmp rax, EFI_SUCCESS
-  jne error
-
   ;read kernel file to memory
 
-  mov r14,0 
-  read_kernel:
-  mov rcx,[KernelFile];first parameter
+  ;jmp read_to_memory
 
-  mov r13,[KernelFileSize]
-  sub r13,r14
-  mov [readed],r13;total to read
-
-  mov rdx,readed;second parameter
-
-  mov r15,[allocated_memory]
-  lea r8, [r15+r14];third parameter
-
-  sub rsp,4*8
-  call qword [rcx+READ]
-  add rsp,4*8
-
-  cmp rax,EFI_SUCCESS
-  jne error
-  
-  ;compare read with file size
-  mov rax, [readed]
-  mov rdx, [KernelFileSize]
-  cmp rax,rdx
-  jne print_not_readed
-
-read_continue:
-  mov rdx,file_loaded_to_memory
-  call print
-
-  add r14,[readed]
-  cmp r14,[KernelFileSize]
-  je continue
-  jl read_kernel
-
+  call read_simple
  
   continue:
 

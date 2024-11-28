@@ -23,6 +23,7 @@ handles_size dq 0
 handles dq ?
 FileSystemDevicePath dq ?
 
+max_size dq 0xFFFFFFFFFFFFFFFF
 
 BootLoaderImage dq ?
 FileSystemProtocol dq ?

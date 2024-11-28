@@ -14,6 +14,12 @@ error_open_file:
   jmp main_loop
 
 error:
+
+  push rax
+  mov rdx, error_msg
+  call print
+  pop rax
+
   mov rbx, EFI_INVALID_PARAMETER
   cmp qword rax,rbx
   je invalid_parameter
@@ -26,8 +32,6 @@ error:
   mov rbx, EFI_UNSUPPORTED
   cmp qword rax,rbx
   je unsupported
-  mov rdx, error_msg
-  call print
   jmp main_loop
   
 invalid_parameter:
